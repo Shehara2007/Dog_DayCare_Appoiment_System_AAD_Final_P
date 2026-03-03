@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawCare — Vaccinations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--cream:#FAF6F0;--warm:#F5EDE0;--bark:#3D2B1F;--bark-light:#6B4C38;--amber:#D4820A;--amber-light:#F0A830;--sage:#7A9E7E;--sage-light:#B8D4BB;--rust:#C0472A;--sky:#5B8FA8;--paw:#E8C9A0;--white:#FFFFFF;--shadow:rgba(61,43,31,0.12)}
+        body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--bark);min-height:100vh}
+        body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;opacity:0.4}
+        .shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+        .sidebar{background:var(--bark);color:var(--cream);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden}
+        .sidebar-brand{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,0.08)}
+        .brand-logo{width:44px;height:44px;background:var(--amber);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;box-shadow:0 4px 16px rgba(212,130,10,0.4)}
+        .brand-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}
+        .brand-sub{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:rgba(250,246,240,0.35);margin-top:2px}
+        .sidebar-nav{flex:1;overflow-y:auto;padding:16px 12px}
+        .nav-section-label{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:rgba(250,246,240,0.25);padding:0 10px;margin:16px 0 6px}
+        .nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;cursor:pointer;transition:all 0.2s;font-size:14px;color:rgba(250,246,240,0.55);margin-bottom:2px;text-decoration:none}
+        .nav-item:hover{background:rgba(255,255,255,0.07);color:var(--cream)}
+        .nav-item.active{background:var(--amber);color:var(--white);font-weight:600;box-shadow:0 4px 20px rgba(212,130,10,0.35)}
+        .nav-icon{font-size:17px;width:20px;text-align:center}
+        .nav-badge{margin-left:auto;background:var(--rust);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+        .sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,0.08)}
+        .user-card{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,0.06);border-radius:12px}
+        .user-avatar{width:36px;height:36px;border-radius:10px;background:var(--amber-light);display:flex;align-items:center;justify-content:center;font-size:16px}
+        .user-name{font-size:13px;font-weight:600}
+        .user-role{font-size:11px;color:rgba(250,246,240,0.4)}
+        .logout-btn{margin-left:auto;font-size:15px;opacity:0.4;cursor:pointer;background:none;border:none;color:var(--cream)}
+        .main{background:var(--cream);overflow-y:auto;position:relative;z-index:1}
+        .topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;background:rgba(250,246,240,0.9);border-bottom:1px solid rgba(61,43,31,0.07);position:sticky;top:0;z-index:10;backdrop-filter:blur(16px)}
+        .page-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700}
+        .page-date{font-size:13px;color:rgba(61,43,31,0.45);margin-top:2px}
+        .topbar-actions{display:flex;align-items:center;gap:10px}
+        .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+        .btn-primary{background:var(--bark);color:var(--cream);box-shadow:0 3px 14px var(--shadow)}
+        .btn-primary:hover{background:var(--bark-light);transform:translateY(-1px)}
+        .btn-outline{background:transparent;color:var(--bark);border:1.5px solid rgba(61,43,31,0.18)}
+        .btn-outline:hover{background:var(--warm)}
+        .btn-amber{background:var(--amber);color:white}
+        .btn-amber:hover{background:var(--amber-light);transform:translateY(-1px)}
+        .content{padding:28px 32px}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+        /* SUMMARY CARDS */
+        .sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+        .sum-card{background:var(--white);border-radius:18px;padding:20px;box-shadow:0 2px 18px var(--shadow);animation:fadeUp 0.5s ease both;transition:transform 0.2s}
+        .sum-card:hover{transform:translateY(-3px)}
+        .sum-card:nth-child(1){animation-delay:0.05s}
+        .sum-card:nth-child(2){animation-delay:0.1s}
+        .sum-card:nth-child(3){animation-delay:0.15s}
+        .sum-card:nth-child(4){animation-delay:0.2s}
+        .sum-icon{font-size:22px;margin-bottom:10px}
+        .sum-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700}
+        .sum-label{font-size:12px;color:rgba(61,43,31,0.5);margin-top:2px}
+
+        /* ALERT BANNER */
+        .vax-alert-banner{background:linear-gradient(135deg,rgba(192,71,42,0.1),rgba(212,130,10,0.08));border:1.5px solid rgba(192,71,42,0.2);border-radius:16px;padding:18px 22px;margin-bottom:22px;display:flex;align-items:center;gap:16px;animation:fadeUp 0.5s ease 0.2s both}
+        .vab-icon{font-size:28px}
+        .vab-title{font-weight:700;font-size:15px;color:var(--rust)}
+        .vab-sub{font-size:13px;color:rgba(61,43,31,0.55);margin-top:2px}
+        .vab-action{margin-left:auto}
+
+        /* VAX TABLE */
+        .card{background:var(--white);border-radius:20px;box-shadow:0 2px 20px var(--shadow);overflow:hidden;animation:fadeUp 0.5s ease 0.25s both}
+        .card-header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 14px;border-bottom:1px solid rgba(61,43,31,0.06)}
+        .card-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700}
+        .card-body{padding:0}
+        .vax-table{width:100%;border-collapse:collapse}
+        .vax-table th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(61,43,31,0.35);padding:12px 22px;font-weight:600;border-bottom:1px solid rgba(61,43,31,0.06)}
+        .vax-table td{padding:14px 22px;border-bottom:1px solid rgba(61,43,31,0.04);font-size:13px;vertical-align:middle}
+        .vax-table tr:last-child td{border-bottom:none}
+        .vax-table tr{transition:background 0.15s;cursor:pointer}
+        .vax-table tr:hover td{background:rgba(250,246,240,0.5)}
+        .dog-cell{display:flex;align-items:center;gap:10px}
+        .dog-emo{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px}
+        .dog-cname{font-weight:600;font-size:13px}
+        .dog-cbreed{font-size:11px;color:rgba(61,43,31,0.4)}
+        .vax-pill{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+        .vp-valid{background:rgba(122,158,126,0.15);color:#3A6B3E}
+        .vp-expiring{background:rgba(212,130,10,0.12);color:#8B5E00}
+        .vp-expired{background:rgba(192,71,42,0.1);color:var(--rust)}
+        .progress-cell{min-width:120px}
+        .prog-bar{height:5px;background:rgba(61,43,31,0.08);border-radius:10px;overflow:hidden;margin-bottom:3px}
+        .prog-fill{height:100%;border-radius:10px}
+        .prog-green{background:var(--sage)}
+        .prog-amber{background:var(--amber)}
+        .prog-red{background:var(--rust)}
+        .prog-label{font-size:10px;color:rgba(61,43,31,0.4)}
+        .action-btns{display:flex;gap:6px}
+        .tbl-btn{padding:5px 10px;border-radius:7px;border:1.5px solid rgba(61,43,31,0.1);background:transparent;cursor:pointer;font-size:11px;font-weight:600;color:var(--bark);transition:all 0.2s}
+        .tbl-btn:hover{background:var(--warm)}
+        .tbl-btn.notify{border-color:var(--amber);color:var(--amber)}
+        .tbl-btn.notify:hover{background:rgba(212,130,10,0.1)}
+
+        ::-webkit-scrollbar{width:5px}
+        ::-webkit-scrollbar-thumb{background:rgba(61,43,31,0.15);border-radius:10px}
+    </style>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo">🐶</div>
+            <div class="brand-name">PawCare</div>
+            <div class="brand-sub">Daycare Management</div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section-label">Main</div>
+            <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+            <a class="nav-item" href="appointments.html"><span class="nav-icon">📅</span> Appointments <span class="nav-badge">3</span></a>
+            <a class="nav-item" href="dog-profiles.html"><span class="nav-icon">🐕</span> Dog Profiles</a>
+            <a class="nav-item" href="health-reports.html"><span class="nav-icon">🏥</span> Health Reports</a>
+            <div class="nav-section-label">Management</div>
+            <a class="nav-item" href="owners.html"><span class="nav-icon">👤</span> Pet Owners</a>
+            <a class="nav-item" href="caretakers.html"><span class="nav-icon">👷</span> Caretakers</a>
+            <a class="nav-item" href="doctors.html"><span class="nav-icon">🩺</span> Doctors</a>
+            <a class="nav-item active" href="vaccinations.html"><span class="nav-icon">💉</span> Vaccinations <span class="nav-badge">2</span></a>
+            <div class="nav-section-label">Tools</div>
+            <a class="nav-item" href="#"><span class="nav-icon">📊</span> Reports</a>
+            <a class="nav-item" href="#"><span class="nav-icon">📱</span> QR Codes</a>
+            <a class="nav-item" href="#"><span class="nav-icon">🔔</span> Alerts</a>
+            <a class="nav-item" href="#"><span class="nav-icon">⚙️</span> Settings</a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar">👩‍💼</div>
+                <div><div class="user-name">Sarah Admin</div><div class="user-role">Administrator</div></div>
+                <button class="logout-btn" onclick="window.location.href='login.html'">↩</button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <div class="page-title">Vaccinations 💉</div>
+                <div class="page-date">Monitor & manage vaccination records</div>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-outline">📤 Notify All Expiring</button>
+                <button class="btn btn-primary">+ Add Record</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Summary -->
+            <div class="sum-grid">
+                <div class="sum-card">
+                    <div class="sum-icon">✅</div>
+                    <div class="sum-val" style="color:var(--sage)">20</div>
+                    <div class="sum-label">Up to Date</div>
+                </div>
+                <div class="sum-card">
+                    <div class="sum-icon">⚠️</div>
+                    <div class="sum-val" style="color:var(--amber)">2</div>
+                    <div class="sum-label">Expiring in 14 Days</div>
+                </div>
+                <div class="sum-card">
+                    <div class="sum-icon">❌</div>
+                    <div class="sum-val" style="color:var(--rust)">0</div>
+                    <div class="sum-label">Expired</div>
+                </div>
+                <div class="sum-card">
+                    <div class="sum-icon">📋</div>
+                    <div class="sum-val">48</div>
+                    <div class="sum-label">Total Records</div>
+                </div>
+            </div>
+
+            <!-- Alert Banner -->
+            <div class="vax-alert-banner">
+                <div class="vab-icon">🚨</div>
+                <div>
+                    <div class="vab-title">2 Vaccinations Expiring Soon</div>
+                    <div class="vab-sub">Buddy (Rabies — 5 days) and Coco (Distemper — 12 days) need urgent renewal before next visit.</div>
+                </div>
+                <div class="vab-action">
+                    <button class="btn btn-amber">Send Reminders</button>
+                </div>
+            </div>
+
+            <!-- Vaccination Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Vaccination Records</div>
+                    <div style="display:flex;gap:8px">
+                        <select style="padding:6px 12px;border-radius:8px;border:1.5px solid rgba(61,43,31,0.1);background:var(--warm);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--bark);outline:none">
+                            <option>All Status</option>
+                            <option>Valid</option>
+                            <option>Expiring Soon</option>
+                            <option>Expired</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="vax-table">
+                        <thead><tr>
+                            <th>Dog</th>
+                            <th>Vaccine Type</th>
+                            <th>Date Given</th>
+                            <th>Expiry Date</th>
+                            <th>Progress</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr></thead>
+                        <tbody>
+                        <tr>
+                            <td><div class="dog-cell"><div class="dog-emo" style="background:#FFF3DC">🐶</div><div><div class="dog-cname">Buddy</div><div class="dog-cbreed">Golden Retriever</div></div></div></td>
+                            <td style="font-weight:600">Rabies</td>
+                            <td style="color:rgba(61,43,31,0.5)">Mar 8, 2025</td>
+                            <td style="font-weight:600;color:var(--rust)">Mar 8, 2026</td>
+                            <td class="progress-cell"><div class="prog-bar"><div class="prog-fill prog-red" style="width:98%"></div></div><div class="prog-label">5 days left</div></td>
+                            <td><span class="vax-pill vp-expiring">⚠️ Expiring</span></td>
+                            <td><div class="action-btns"><button class="tbl-btn notify">📱 Notify</button><button class="tbl-btn">✏️ Edit</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><div class="dog-cell"><div class="dog-emo" style="background:#FFF3DC">🐶</div><div><div class="dog-cname">Buddy</div><div class="dog-cbreed">Golden Retriever</div></div></div></td>
+                            <td style="font-weight:600">Distemper</td>
+                            <td style="color:rgba(61,43,31,0.5)">Sep 14, 2025</td>
+                            <td style="font-weight:600">Sep 14, 2026</td>
+                            <td class="progress-cell"><div class="prog-bar"><div class="prog-fill prog-green" style="width:40%"></div></div><div class="prog-label">6 months left</div></td>
+                            <td><span class="vax-pill vp-valid">✅ Valid</span></td>
+                            <td><div class="action-btns"><button class="tbl-btn">👁 View</button><button class="tbl-btn">✏️ Edit</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><div class="dog-cell"><div class="dog-emo" style="background:#FDEAEA">🐩</div><div><div class="dog-cname">Luna</div><div class="dog-cbreed">Poodle</div></div></div></td>
+                            <td style="font-weight:600">Rabies</td>
+                            <td style="color:rgba(61,43,31,0.5)">Mar 28, 2025</td>
+                            <td style="font-weight:600">Mar 28, 2026</td>
+                            <td class="progress-cell"><div class="prog-bar"><div class="prog-fill prog-amber" style="width:88%"></div></div><div class="prog-label">25 days left</div></td>
+                            <td><span class="vax-pill vp-valid">✅ Valid</span></td>
+                            <td><div class="action-btns"><button class="tbl-btn">👁 View</button><button class="tbl-btn">✏️ Edit</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><div class="dog-cell"><div class="dog-emo" style="background:#E8F4ED">🐕‍🦺</div><div><div class="dog-cname">Max</div><div class="dog-cbreed">Labrador</div></div></div></td>
+                            <td style="font-weight:600">Rabies</td>
+                            <td style="color:rgba(61,43,31,0.5)">Jun 15, 2025</td>
+                            <td style="font-weight:600">Jun 15, 2026</td>
+                            <td class="progress-cell"><div class="prog-bar"><div class="prog-fill prog-green" style="width:55%"></div></div><div class="prog-label">3.5 months left</div></td>
+                            <td><span class="vax-pill vp-valid">✅ Valid</span></td>
+                            <td><div class="action-btns"><button class="tbl-btn">👁 View</button><button class="tbl-btn">✏️ Edit</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><div class="dog-cell"><div class="dog-emo" style="background:#EAF1F7">🦮</div><div><div class="dog-cname">Coco</div><div class="dog-cbreed">Beagle</div></div></div></td>
+                            <td style="font-weight:600">Distemper</td>
+                            <td style="color:rgba(61,43,31,0.5)">Mar 15, 2025</td>
+                            <td style="font-weight:600;color:var(--amber)">Mar 15, 2026</td>
+                            <td class="progress-cell"><div class="prog-bar"><div class="prog-fill prog-amber" style="width:95%"></div></div><div class="prog-label">12 days left</div></td>
+                            <td><span class="vax-pill vp-expiring">⚠️ Expiring</span></td>
+                            <td><div class="action-btns"><button class="tbl-btn notify">📱 Notify</button><button class="tbl-btn">✏️ Edit</button></div></td>
+                        </tr>
+                        <tr>
+                            <td><div class="dog-cell"><div class="dog-emo" style="background:#FFF0F8">🐶</div><div><div class="dog-cname">Bella</div><div class="dog-cbreed">Husky</div></div></div></td>
+                            <td style="font-weight:600">Rabies</td>
+                            <td style="color:rgba(61,43,31,0.5)">Jul 20, 2025</td>
+                            <td style="font-weight:600">Jul 20, 2026</td>
+                            <td class="progress-cell"><div class="prog-bar"><div class="prog-fill prog-green" style="width:45%"></div></div><div class="prog-label">4.5 months left</div></td>
+                            <td><span class="vax-pill vp-valid">✅ Valid</span></td>
+                            <td><div class="action-btns"><button class="tbl-btn">👁 View</button><button class="tbl-btn">✏️ Edit</button></div></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    document.querySelectorAll('.tbl-btn.notify').forEach(btn=>{
+        btn.addEventListener('click',function(){
+            this.textContent='✅ Sent!';
+            this.style.borderColor='var(--sage)';
+            this.style.color='var(--sage)';
+            setTimeout(()=>{this.textContent='📱 Notify';this.style.borderColor='';this.style.color=''},2000);
+        });
+    });
+</script>
+</body>
+</html>

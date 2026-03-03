@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawCare — Dog Profiles</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--cream:#FAF6F0;--warm:#F5EDE0;--bark:#3D2B1F;--bark-light:#6B4C38;--amber:#D4820A;--amber-light:#F0A830;--sage:#7A9E7E;--sage-light:#B8D4BB;--rust:#C0472A;--sky:#5B8FA8;--paw:#E8C9A0;--white:#FFFFFF;--shadow:rgba(61,43,31,0.12)}
+        body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--bark);min-height:100vh}
+        body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;opacity:0.4}
+        .shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+        .sidebar{background:var(--bark);color:var(--cream);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden}
+        .sidebar-brand{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,0.08)}
+        .brand-logo{width:44px;height:44px;background:var(--amber);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;box-shadow:0 4px 16px rgba(212,130,10,0.4)}
+        .brand-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}
+        .brand-sub{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:rgba(250,246,240,0.35);margin-top:2px}
+        .sidebar-nav{flex:1;overflow-y:auto;padding:16px 12px}
+        .nav-section-label{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:rgba(250,246,240,0.25);padding:0 10px;margin:16px 0 6px}
+        .nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;cursor:pointer;transition:all 0.2s;font-size:14px;color:rgba(250,246,240,0.55);margin-bottom:2px;text-decoration:none}
+        .nav-item:hover{background:rgba(255,255,255,0.07);color:var(--cream)}
+        .nav-item.active{background:var(--amber);color:var(--white);font-weight:600;box-shadow:0 4px 20px rgba(212,130,10,0.35)}
+        .nav-icon{font-size:17px;width:20px;text-align:center}
+        .nav-badge{margin-left:auto;background:var(--rust);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+        .sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,0.08)}
+        .user-card{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,0.06);border-radius:12px}
+        .user-avatar{width:36px;height:36px;border-radius:10px;background:var(--amber-light);display:flex;align-items:center;justify-content:center;font-size:16px}
+        .user-name{font-size:13px;font-weight:600}
+        .user-role{font-size:11px;color:rgba(250,246,240,0.4)}
+        .logout-btn{margin-left:auto;font-size:15px;opacity:0.4;cursor:pointer;background:none;border:none;color:var(--cream)}
+        .main{background:var(--cream);overflow-y:auto;position:relative;z-index:1}
+        .topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;background:rgba(250,246,240,0.9);border-bottom:1px solid rgba(61,43,31,0.07);position:sticky;top:0;z-index:10;backdrop-filter:blur(16px)}
+        .page-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700}
+        .page-date{font-size:13px;color:rgba(61,43,31,0.45);margin-top:2px}
+        .topbar-actions{display:flex;align-items:center;gap:10px}
+        .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+        .btn-primary{background:var(--bark);color:var(--cream);box-shadow:0 3px 14px var(--shadow)}
+        .btn-primary:hover{background:var(--bark-light);transform:translateY(-1px)}
+        .btn-outline{background:transparent;color:var(--bark);border:1.5px solid rgba(61,43,31,0.18)}
+        .btn-outline:hover{background:var(--warm)}
+        .content{padding:28px 32px}
+        .search-wrap{position:relative}
+        .search-input{background:var(--white);border:1.5px solid rgba(61,43,31,0.1);border-radius:11px;padding:9px 14px 9px 38px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--bark);width:220px;outline:none;transition:all 0.2s}
+        .search-input:focus{border-color:var(--amber);width:260px}
+        .search-input::placeholder{color:rgba(61,43,31,0.3)}
+        .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.4}
+
+        /* FILTERS */
+        .filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+        .filter-chip{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid rgba(61,43,31,0.1);background:var(--white);color:rgba(61,43,31,0.5);transition:all 0.2s}
+        .filter-chip.active{background:var(--bark);color:var(--cream);border-color:var(--bark)}
+        .filter-chip:hover:not(.active){background:var(--warm)}
+        .filter-right{margin-left:auto}
+
+        /* DOG GRID */
+        .dogs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+        .dog-card{background:var(--white);border-radius:20px;box-shadow:0 2px 20px var(--shadow);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;animation:fadeUp 0.4s ease both}
+        .dog-card:nth-child(1){animation-delay:0.05s}
+        .dog-card:nth-child(2){animation-delay:0.1s}
+        .dog-card:nth-child(3){animation-delay:0.15s}
+        .dog-card:nth-child(4){animation-delay:0.2s}
+        .dog-card:nth-child(5){animation-delay:0.25s}
+        .dog-card:nth-child(6){animation-delay:0.3s}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        .dog-card:hover{transform:translateY(-5px);box-shadow:0 14px 40px var(--shadow)}
+
+        .dog-card-hdr{height:90px;position:relative;display:flex;align-items:flex-end;justify-content:flex-end;padding:14px}
+        .dog-emoji-wrap{position:absolute;bottom:-24px;left:18px;width:58px;height:58px;background:var(--white);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 16px rgba(61,43,31,0.18);z-index:2}
+        .health-tag{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px)}
+        .tag-good{color:#3A6B3E}
+        .tag-poor{color:var(--rust)}
+        .tag-watch{color:#8B5E00}
+
+        .dog-card-body{padding:32px 18px 18px}
+        .dog-card-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:700}
+        .dog-card-sub{font-size:12px;color:rgba(61,43,31,0.45);margin-bottom:14px}
+
+        .dog-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+        .di{padding:8px 10px;background:var(--warm);border-radius:10px}
+        .di-label{font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:rgba(61,43,31,0.4);margin-bottom:2px}
+        .di-val{font-size:12px;font-weight:600}
+
+        .risk-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:12px}
+        .risk-low{background:rgba(122,158,126,0.12);color:#3A6B3E}
+        .risk-med{background:rgba(212,130,10,0.1);color:#8B5E00}
+        .risk-high{background:rgba(192,71,42,0.12);color:var(--rust)}
+
+        .dog-card-footer{display:flex;gap:8px;border-top:1px solid rgba(61,43,31,0.06);padding-top:14px}
+        .card-action-btn{flex:1;padding:8px;border-radius:9px;border:1.5px solid rgba(61,43,31,0.1);background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--bark);transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:5px}
+        .card-action-btn:hover{background:var(--warm)}
+        .card-action-btn.primary{background:var(--bark);color:var(--cream);border-color:var(--bark)}
+        .card-action-btn.primary:hover{background:var(--bark-light)}
+
+        /* PROFILE MODAL / DETAIL PANEL */
+        .detail-overlay{position:fixed;inset:0;background:rgba(61,43,31,0.5);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:center;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity 0.3s}
+        .detail-overlay.open{opacity:1;pointer-events:all}
+        .detail-panel{background:var(--cream);width:420px;height:100%;overflow-y:auto;padding:32px;transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.22,1,0.36,1)}
+        .detail-overlay.open .detail-panel{transform:translateX(0)}
+        .detail-close{width:36px;height:36px;border-radius:10px;background:var(--warm);border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;margin-bottom:24px}
+        .detail-header{text-align:center;margin-bottom:24px}
+        .detail-avatar{width:80px;height:80px;border-radius:22px;background:var(--white);display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 14px;box-shadow:0 6px 24px var(--shadow)}
+        .detail-name{font-family:'Playfair Display',serif;font-size:24px;font-weight:700}
+        .detail-sub{font-size:13px;color:rgba(61,43,31,0.5);margin-top:4px}
+        .detail-section-title{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(61,43,31,0.35);font-weight:700;margin:20px 0 10px}
+        .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+        .detail-item{background:var(--white);padding:12px;border-radius:12px}
+        .detail-item-label{font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:rgba(61,43,31,0.4);margin-bottom:4px}
+        .detail-item-val{font-size:14px;font-weight:600}
+        .report-list{display:flex;flex-direction:column;gap:8px}
+        .report-item{background:var(--white);border-radius:12px;padding:12px;border-left:3px solid}
+        .report-friendly{border-color:var(--sage)}
+        .report-active{border-color:var(--amber)}
+        .report-dangerous{border-color:var(--rust)}
+        .report-date{font-size:10px;color:rgba(61,43,31,0.35);margin-bottom:4px}
+        .report-behaviour{font-size:13px;font-weight:700}
+        .report-notes{font-size:12px;color:rgba(61,43,31,0.5);margin-top:3px}
+        .vax-bar{background:var(--white);border-radius:12px;padding:14px;margin-bottom:16px}
+        .vax-label-row{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:8px}
+        .vax-progress{height:8px;background:rgba(61,43,31,0.08);border-radius:20px;overflow:hidden}
+        .vax-fill{height:100%;border-radius:20px;background:var(--sage)}
+        .vax-expiry{font-size:11px;color:rgba(61,43,31,0.4);margin-top:6px}
+
+        ::-webkit-scrollbar{width:5px}
+        ::-webkit-scrollbar-thumb{background:rgba(61,43,31,0.15);border-radius:10px}
+    </style>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo">🐶</div>
+            <div class="brand-name">PawCare</div>
+            <div class="brand-sub">Daycare Management</div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section-label">Main</div>
+            <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+            <a class="nav-item" href="appointments.html"><span class="nav-icon">📅</span> Appointments <span class="nav-badge">3</span></a>
+            <a class="nav-item active" href="dog-profiles.html"><span class="nav-icon">🐕</span> Dog Profiles</a>
+            <a class="nav-item" href="health-reports.html"><span class="nav-icon">🏥</span> Health Reports</a>
+            <div class="nav-section-label">Management</div>
+            <a class="nav-item" href="owners.html"><span class="nav-icon">👤</span> Pet Owners</a>
+            <a class="nav-item" href="caretakers.html"><span class="nav-icon">👷</span> Caretakers</a>
+            <a class="nav-item" href="doctors.html"><span class="nav-icon">🩺</span> Doctors</a>
+            <a class="nav-item" href="vaccinations.html"><span class="nav-icon">💉</span> Vaccinations <span class="nav-badge">2</span></a>
+            <div class="nav-section-label">Tools</div>
+            <a class="nav-item" href="#"><span class="nav-icon">📊</span> Reports</a>
+            <a class="nav-item" href="#"><span class="nav-icon">📱</span> QR Codes</a>
+            <a class="nav-item" href="#"><span class="nav-icon">🔔</span> Alerts</a>
+            <a class="nav-item" href="#"><span class="nav-icon">⚙️</span> Settings</a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar">👩‍💼</div>
+                <div><div class="user-name">Sarah Admin</div><div class="user-role">Administrator</div></div>
+                <button class="logout-btn" onclick="window.location.href='login.html'">↩</button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <div class="page-title">Dog Profiles 🐕</div>
+                <div class="page-date">24 registered dogs · 2 health alerts</div>
+            </div>
+            <div class="topbar-actions">
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input class="search-input" placeholder="Search by name or breed…">
+                </div>
+                <button class="btn btn-primary" onclick="document.getElementById('detailPanel').classList.add('open')">+ Register Dog</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="filter-bar">
+                <div class="filter-chip active">All Dogs (24)</div>
+                <div class="filter-chip">🟢 Healthy</div>
+                <div class="filter-chip">🔴 Health Issues</div>
+                <div class="filter-chip">⚠️ Vax Expiring</div>
+                <div class="filter-chip">🔥 High Risk</div>
+                <div class="filter-right">
+                    <button class="btn btn-outline">🗂 Grid</button>
+                </div>
+            </div>
+
+            <div class="dogs-grid">
+                <!-- Dog 1 -->
+                <div class="dog-card" onclick="openDetail('buddy')">
+                    <div class="dog-card-hdr" style="background:linear-gradient(135deg,#F5DFA0,#E8C06C)">
+                        <span class="health-tag tag-good">● Good Health</span>
+                        <div class="dog-emoji-wrap">🐶</div>
+                    </div>
+                    <div class="dog-card-body">
+                        <div class="dog-card-name">Buddy</div>
+                        <div class="dog-card-sub">Golden Retriever · 3 yrs · Male</div>
+                        <span class="risk-tag risk-low">🛡 Low Risk</span>
+                        <div class="dog-info-grid">
+                            <div class="di"><div class="di-label">Owner</div><div class="di-val">James K.</div></div>
+                            <div class="di"><div class="di-label">Behaviour</div><div class="di-val">🟢 Friendly</div></div>
+                            <div class="di"><div class="di-label">Vax Expiry</div><div class="di-val" style="color:var(--rust)">⚠️ 5 days</div></div>
+                            <div class="di"><div class="di-label">Visits</div><div class="di-val">14 total</div></div>
+                        </div>
+                        <div class="dog-card-footer">
+                            <button class="card-action-btn" onclick="event.stopPropagation()">📱 QR</button>
+                            <button class="card-action-btn" onclick="event.stopPropagation()">📋 Report</button>
+                            <button class="card-action-btn primary" onclick="event.stopPropagation()">👁 View</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dog 2 -->
+                <div class="dog-card" onclick="openDetail('luna')">
+                    <div class="dog-card-hdr" style="background:linear-gradient(135deg,#F5A8A8,#E87070)">
+                        <span class="health-tag tag-poor">● Poor Health</span>
+                        <div class="dog-emoji-wrap">🐩</div>
+                    </div>
+                    <div class="dog-card-body">
+                        <div class="dog-card-name">Luna</div>
+                        <div class="dog-card-sub">Poodle · 2 yrs · Female</div>
+                        <span class="risk-tag risk-med">⚡ Medium Risk</span>
+                        <div class="dog-info-grid">
+                            <div class="di"><div class="di-label">Owner</div><div class="di-val">Priya M.</div></div>
+                            <div class="di"><div class="di-label">Behaviour</div><div class="di-val">🟡 Active</div></div>
+                            <div class="di"><div class="di-label">Vax Expiry</div><div class="di-val">Mar 28, 2026</div></div>
+                            <div class="di"><div class="di-label">Visits</div><div class="di-val">8 total</div></div>
+                        </div>
+                        <div class="dog-card-footer">
+                            <button class="card-action-btn" onclick="event.stopPropagation()">📱 QR</button>
+                            <button class="card-action-btn" onclick="event.stopPropagation()">📋 Report</button>
+                            <button class="card-action-btn primary" onclick="event.stopPropagation()">👁 View</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dog 3 -->
+                <div class="dog-card">
+                    <div class="dog-card-hdr" style="background:linear-gradient(135deg,#A8D8B0,#70B57A)">
+                        <span class="health-tag tag-good">● Good Health</span>
+                        <div class="dog-emoji-wrap">🐕‍🦺</div>
+                    </div>
+                    <div class="dog-card-body">
+                        <div class="dog-card-name">Max</div>
+                        <div class="dog-card-sub">Labrador · 5 yrs · Male</div>
+                        <span class="risk-tag risk-low">🛡 Low Risk</span>
+                        <div class="dog-info-grid">
+                            <div class="di"><div class="di-label">Owner</div><div class="di-val">Anna L.</div></div>
+                            <div class="di"><div class="di-label">Behaviour</div><div class="di-val">🟢 Friendly</div></div>
+                            <div class="di"><div class="di-label">Vax Expiry</div><div class="di-val">Jun 15, 2026</div></div>
+                            <div class="di"><div class="di-label">Visits</div><div class="di-val">22 total</div></div>
+                        </div>
+                        <div class="dog-card-footer">
+                            <button class="card-action-btn">📱 QR</button>
+                            <button class="card-action-btn">📋 Report</button>
+                            <button class="card-action-btn primary">👁 View</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dog 4 -->
+                <div class="dog-card">
+                    <div class="dog-card-hdr" style="background:linear-gradient(135deg,#B8D4F0,#7AACD4)">
+                        <span class="health-tag tag-good">● Good Health</span>
+                        <div class="dog-emoji-wrap">🦮</div>
+                    </div>
+                    <div class="dog-card-body">
+                        <div class="dog-card-name">Coco</div>
+                        <div class="dog-card-sub">Beagle · 4 yrs · Female</div>
+                        <span class="risk-tag risk-low">🛡 Low Risk</span>
+                        <div class="dog-info-grid">
+                            <div class="di"><div class="di-label">Owner</div><div class="di-val">David R.</div></div>
+                            <div class="di"><div class="di-label">Behaviour</div><div class="di-val">🟢 Friendly</div></div>
+                            <div class="di"><div class="di-label">Vax Expiry</div><div class="di-val" style="color:var(--amber)">⚠️ 12 days</div></div>
+                            <div class="di"><div class="di-label">Visits</div><div class="di-val">6 total</div></div>
+                        </div>
+                        <div class="dog-card-footer">
+                            <button class="card-action-btn">📱 QR</button>
+                            <button class="card-action-btn">📋 Report</button>
+                            <button class="card-action-btn primary">👁 View</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dog 5 -->
+                <div class="dog-card">
+                    <div class="dog-card-hdr" style="background:linear-gradient(135deg,#D4B8F0,#A87AD4)">
+                        <span class="health-tag tag-good">● Good Health</span>
+                        <div class="dog-emoji-wrap">🐶</div>
+                    </div>
+                    <div class="dog-card-body">
+                        <div class="dog-card-name">Bella</div>
+                        <div class="dog-card-sub">Husky · 2 yrs · Female</div>
+                        <span class="risk-tag risk-low">🛡 Low Risk</span>
+                        <div class="dog-info-grid">
+                            <div class="di"><div class="di-label">Owner</div><div class="di-val">Sophie T.</div></div>
+                            <div class="di"><div class="di-label">Behaviour</div><div class="di-val">🟡 Active</div></div>
+                            <div class="di"><div class="di-label">Vax Expiry</div><div class="di-val">Jul 20, 2026</div></div>
+                            <div class="di"><div class="di-label">Visits</div><div class="di-val">11 total</div></div>
+                        </div>
+                        <div class="dog-card-footer">
+                            <button class="card-action-btn">📱 QR</button>
+                            <button class="card-action-btn">📋 Report</button>
+                            <button class="card-action-btn primary">👁 View</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dog 6 - High Risk -->
+                <div class="dog-card">
+                    <div class="dog-card-hdr" style="background:linear-gradient(135deg,#F0C4A8,#D47A4A)">
+                        <span class="health-tag tag-watch">● Monitor</span>
+                        <div class="dog-emoji-wrap">🐾</div>
+                    </div>
+                    <div class="dog-card-body">
+                        <div class="dog-card-name">Rocky</div>
+                        <div class="dog-card-sub">German Shepherd · 6 yrs · Male</div>
+                        <span class="risk-tag risk-high">🔥 High Risk</span>
+                        <div class="dog-info-grid">
+                            <div class="di"><div class="di-label">Owner</div><div class="di-val">Mike R.</div></div>
+                            <div class="di"><div class="di-label">Behaviour</div><div class="di-val">🔴 Dangerous</div></div>
+                            <div class="di"><div class="di-label">Vax Expiry</div><div class="di-val">Apr 10, 2026</div></div>
+                            <div class="di"><div class="di-label">Visits</div><div class="di-val">19 total</div></div>
+                        </div>
+                        <div class="dog-card-footer">
+                            <button class="card-action-btn">📱 QR</button>
+                            <button class="card-action-btn">📋 Report</button>
+                            <button class="card-action-btn primary">👁 View</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Detail Side Panel -->
+<div class="detail-overlay" id="detailPanel">
+    <div class="detail-panel">
+        <button class="detail-close" onclick="document.getElementById('detailPanel').classList.remove('open')">✕</button>
+        <div class="detail-header">
+            <div class="detail-avatar" id="detailEmoji">🐶</div>
+            <div class="detail-name" id="detailName">Buddy</div>
+            <div class="detail-sub" id="detailSub">Golden Retriever · 3 yrs · Male</div>
+        </div>
+
+        <div class="detail-section-title">Dog Information</div>
+        <div class="detail-grid">
+            <div class="detail-item"><div class="detail-item-label">Owner</div><div class="detail-item-val">James K.</div></div>
+            <div class="detail-item"><div class="detail-item-label">Risk Level</div><div class="detail-item-val">🛡 Low</div></div>
+            <div class="detail-item"><div class="detail-item-label">Weight</div><div class="detail-item-val">28 kg</div></div>
+            <div class="detail-item"><div class="detail-item-label">Behaviour</div><div class="detail-item-val">🟢 Friendly</div></div>
+        </div>
+
+        <div class="detail-section-title">Vaccination Status</div>
+        <div class="vax-bar">
+            <div class="vax-label-row"><span>Rabies Vaccine</span><span style="color:var(--rust)">⚠️ Expiring</span></div>
+            <div class="vax-progress"><div class="vax-fill" style="width:95%;background:var(--rust)"></div></div>
+            <div class="vax-expiry">Expires: March 8, 2026 · 5 days remaining</div>
+        </div>
+        <div class="vax-bar">
+            <div class="vax-label-row"><span>Distemper Vaccine</span><span style="color:var(--sage)">✅ Valid</span></div>
+            <div class="vax-progress"><div class="vax-fill" style="width:40%"></div></div>
+            <div class="vax-expiry">Expires: September 14, 2026 · 6 months remaining</div>
+        </div>
+
+        <div class="detail-section-title">Behaviour Reports</div>
+        <div class="report-list">
+            <div class="report-item report-friendly">
+                <div class="report-date">March 2, 2026 · Maria Santos</div>
+                <div class="report-behaviour">🟢 Friendly · Health: Good</div>
+                <div class="report-notes">Played well with other dogs. Very energetic today.</div>
+            </div>
+            <div class="report-item report-friendly">
+                <div class="report-date">February 28, 2026 · Tom Baker</div>
+                <div class="report-behaviour">🟢 Friendly · Health: Good</div>
+                <div class="report-notes">Ate well. No issues reported.</div>
+            </div>
+            <div class="report-item report-active">
+                <div class="report-date">February 25, 2026 · Kelly Park</div>
+                <div class="report-behaviour">🟡 Active · Health: Good</div>
+                <div class="report-notes">Extra energetic. Required extra attention during playtime.</div>
+            </div>
+        </div>
+
+        <div style="margin-top:20px;display:flex;gap:10px">
+            <button class="btn btn-outline" style="flex:1">✏️ Edit Profile</button>
+            <button class="btn btn-primary" style="flex:1">📋 Add Report</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDetail(dog){
+        document.getElementById('detailPanel').classList.add('open');
+    }
+    document.getElementById('detailPanel').addEventListener('click',function(e){
+        if(e.target===this) this.classList.remove('open');
+    });
+    document.querySelectorAll('.filter-chip').forEach(chip=>{
+        chip.addEventListener('click',function(){
+            document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+</script>
+</body>
+</html>

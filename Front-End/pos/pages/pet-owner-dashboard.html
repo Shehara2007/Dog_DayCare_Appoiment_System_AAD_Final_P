@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawCare — My Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--cream:#FAF6F0;--warm:#F5EDE0;--bark:#3D2B1F;--bark-light:#6B4C38;--amber:#D4820A;--amber-light:#F0A830;--sage:#7A9E7E;--sage-light:#B8D4BB;--rust:#C0472A;--sky:#5B8FA8;--paw:#E8C9A0;--white:#FFFFFF;--shadow:rgba(61,43,31,0.12)}
+        body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--bark);min-height:100vh}
+        body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;opacity:0.4}
+        .blob{position:fixed;border-radius:50%;filter:blur(80px);opacity:0.18;pointer-events:none;z-index:0}
+        .blob-1{width:400px;height:400px;background:var(--amber-light);top:-100px;right:100px;animation:blobF 10s ease-in-out infinite}
+        .blob-2{width:280px;height:280px;background:var(--sage-light);bottom:100px;left:100px;animation:blobF 13s ease-in-out infinite reverse}
+        @keyframes blobF{0%,100%{transform:scale(1)}50%{transform:scale(1.1) translate(15px,-15px)}}
+        .shell{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+        .sidebar{background:var(--bark);color:var(--cream);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden}
+        .sidebar-brand{padding:28px 22px 20px;border-bottom:1px solid rgba(255,255,255,0.08)}
+        .brand-logo{width:44px;height:44px;background:var(--amber);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;box-shadow:0 4px 16px rgba(212,130,10,0.4)}
+        .brand-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}
+        .brand-sub{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:rgba(250,246,240,0.35);margin-top:2px}
+        .sidebar-nav{flex:1;overflow-y:auto;padding:16px 12px}
+        .nav-section-label{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:rgba(250,246,240,0.25);padding:0 10px;margin:16px 0 6px}
+        .nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;cursor:pointer;transition:all 0.2s;font-size:14px;color:rgba(250,246,240,0.55);margin-bottom:2px;text-decoration:none}
+        .nav-item:hover{background:rgba(255,255,255,0.07);color:var(--cream)}
+        .nav-item.active{background:var(--amber);color:var(--white);font-weight:600;box-shadow:0 4px 20px rgba(212,130,10,0.35)}
+        .nav-icon{font-size:17px;width:20px;text-align:center}
+        .nav-badge{margin-left:auto;background:var(--rust);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+        .sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,0.08)}
+        .user-card{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,0.06);border-radius:12px}
+        .user-avatar{width:36px;height:36px;border-radius:10px;background:var(--amber-light);display:flex;align-items:center;justify-content:center;font-size:16px}
+        .user-name{font-size:13px;font-weight:600}
+        .user-role{font-size:11px;color:rgba(250,246,240,0.4)}
+        .logout-btn{margin-left:auto;font-size:15px;opacity:0.4;cursor:pointer;background:none;border:none;color:var(--cream)}
+        .main{background:var(--cream);overflow-y:auto;position:relative;z-index:1}
+        .topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;background:rgba(250,246,240,0.9);border-bottom:1px solid rgba(61,43,31,0.07);position:sticky;top:0;z-index:10;backdrop-filter:blur(16px)}
+        .page-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700}
+        .page-date{font-size:13px;color:rgba(61,43,31,0.45);margin-top:2px}
+        .topbar-actions{display:flex;align-items:center;gap:10px}
+        .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+        .btn-primary{background:var(--bark);color:var(--cream);box-shadow:0 3px 14px var(--shadow)}
+        .btn-primary:hover{background:var(--bark-light);transform:translateY(-1px)}
+        .btn-amber{background:var(--amber);color:white}
+        .btn-amber:hover{background:var(--amber-light);transform:translateY(-1px)}
+        .btn-outline{background:transparent;color:var(--bark);border:1.5px solid rgba(61,43,31,0.18)}
+        .btn-outline:hover{background:var(--warm)}
+        .content{padding:28px 32px}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+        /* HERO WELCOME */
+        .welcome-hero{
+            background:linear-gradient(135deg,var(--bark) 0%,var(--bark-light) 100%);
+            border-radius:22px;padding:28px 32px;color:var(--cream);
+            display:flex;align-items:center;justify-content:space-between;
+            margin-bottom:24px;animation:fadeUp 0.5s ease both;
+            overflow:hidden;position:relative;
+        }
+        .welcome-hero::before{content:'🐾';position:absolute;right:32px;top:50%;transform:translateY(-50%);font-size:100px;opacity:0.06}
+        .wh-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:6px}
+        .wh-sub{font-size:14px;color:rgba(250,246,240,0.6)}
+        .wh-actions{display:flex;gap:10px;margin-top:16px}
+
+        /* MY DOGS */
+        .my-dogs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:26px}
+        .my-dog-card{background:var(--white);border-radius:18px;box-shadow:0 2px 18px var(--shadow);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;animation:fadeUp 0.5s ease both}
+        .my-dog-card:nth-child(1){animation-delay:0.1s}
+        .my-dog-card:nth-child(2){animation-delay:0.15s}
+        .my-dog-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px var(--shadow)}
+        .mdc-header{height:80px;position:relative;display:flex;align-items:flex-start;justify-content:flex-end;padding:14px}
+        .mdc-emoji{width:52px;height:52px;background:var(--white);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 14px rgba(61,43,31,0.18);position:absolute;bottom:-18px;left:14px}
+        .health-tag{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px)}
+        .tag-good{color:#3A6B3E}
+        .tag-poor{color:var(--rust)}
+        .mdc-body{padding:28px 14px 16px}
+        .mdc-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+        .mdc-sub{font-size:11px;color:rgba(61,43,31,0.45);margin-bottom:12px}
+        .mdc-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        .mds{padding:7px 9px;background:var(--warm);border-radius:9px}
+        .mds-label{font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:rgba(61,43,31,0.4);margin-bottom:2px}
+        .mds-val{font-size:12px;font-weight:600}
+        .mdc-footer{display:flex;gap:6px;border-top:1px solid rgba(61,43,31,0.06);padding-top:12px}
+        .mdc-btn{flex:1;padding:7px;border-radius:8px;border:1.5px solid rgba(61,43,31,0.1);background:transparent;cursor:pointer;font-size:11px;font-weight:600;color:var(--bark);transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px}
+        .mdc-btn:hover{background:var(--warm)}
+        .mdc-btn.primary{background:var(--bark);color:var(--cream);border-color:var(--bark)}
+        .mdc-btn.primary:hover{background:var(--bark-light)}
+
+        /* BOOKING SECTION */
+        .booking-layout{display:grid;grid-template-columns:1fr 300px;gap:22px;margin-bottom:26px}
+        .card{background:var(--white);border-radius:20px;box-shadow:0 2px 20px var(--shadow);overflow:hidden;animation:fadeUp 0.5s ease 0.2s both}
+        .card-header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 14px;border-bottom:1px solid rgba(61,43,31,0.06)}
+        .card-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700}
+        .card-body{padding:20px 22px}
+        .view-all{font-size:12px;color:var(--amber);font-weight:600;cursor:pointer}
+
+        /* UPCOMING BOOKINGS */
+        .booking-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid rgba(61,43,31,0.05)}
+        .booking-item:last-child{border-bottom:none}
+        .bi-time{min-width:60px;text-align:center;padding:8px;background:var(--warm);border-radius:10px}
+        .bi-time-val{font-family:'Playfair Display',serif;font-size:16px;font-weight:700}
+        .bi-time-ampm{font-size:10px;color:rgba(61,43,31,0.45)}
+        .bi-emoji{font-size:24px}
+        .bi-info{flex:1}
+        .bi-name{font-weight:700;font-size:14px}
+        .bi-meta{font-size:12px;color:rgba(61,43,31,0.45);margin-top:2px}
+        .status-badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+        .badge-confirmed{background:rgba(122,158,126,0.15);color:#4A7A4E}
+        .badge-pending{background:rgba(212,130,10,0.12);color:#8B5E00}
+
+        /* NOTIFICATIONS */
+        .notif-list{display:flex;flex-direction:column;gap:10px}
+        .notif-item{padding:12px;border-radius:12px;border-left:3px solid;font-size:12px}
+        .notif-vax{background:rgba(212,130,10,0.07);border-color:var(--amber)}
+        .notif-health{background:rgba(122,158,126,0.07);border-color:var(--sage)}
+        .notif-title{font-weight:700;margin-bottom:3px;font-size:13px}
+        .notif-desc{color:rgba(61,43,31,0.55);line-height:1.5}
+        .notif-time{font-size:10px;color:rgba(61,43,31,0.3);margin-top:5px}
+
+        /* BOOK SERVICE FORM */
+        .service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+        .service-card{padding:14px;background:var(--warm);border-radius:14px;cursor:pointer;text-align:center;border:2px solid transparent;transition:all 0.2s}
+        .service-card:hover{background:var(--paw)}
+        .service-card.selected{background:rgba(61,43,31,0.06);border-color:var(--bark)}
+        .service-icon{font-size:24px;margin-bottom:6px}
+        .service-name{font-size:12px;font-weight:600}
+        .service-price{font-size:11px;color:rgba(61,43,31,0.45);margin-top:2px}
+        .form-group{margin-bottom:16px}
+        .form-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:rgba(61,43,31,0.45);margin-bottom:7px;display:block}
+        .form-select,.form-input{width:100%;padding:10px 14px;background:var(--warm);border:1.5px solid transparent;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--bark);outline:none;transition:all 0.2s;-webkit-appearance:none}
+        .form-select:focus,.form-input:focus{background:var(--white);border-color:var(--amber)}
+        .vax-alert{padding:10px 14px;background:rgba(192,71,42,0.08);border-left:3px solid var(--rust);border-radius:8px;font-size:12px;color:var(--rust);margin-bottom:14px;display:none}
+        .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+        ::-webkit-scrollbar{width:5px}
+        ::-webkit-scrollbar-thumb{background:rgba(61,43,31,0.15);border-radius:10px}
+    </style>
+</head>
+<body>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo">🐾</div>
+            <div class="brand-name">PawCare</div>
+            <div class="brand-sub">Pet Owner Portal</div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section-label">My Portal</div>
+            <a class="nav-item active" href="owner-dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+            <a class="nav-item" href="#"><span class="nav-icon">📅</span> My Bookings <span class="nav-badge">1</span></a>
+            <a class="nav-item" href="#"><span class="nav-icon">🐕</span> My Dogs</a>
+            <a class="nav-item" href="#"><span class="nav-icon">🏥</span> Health History</a>
+            <a class="nav-item" href="#"><span class="nav-icon">💉</span> Vaccinations</a>
+            <div class="nav-section-label">Account</div>
+            <a class="nav-item" href="#"><span class="nav-icon">👤</span> My Profile</a>
+            <a class="nav-item" href="#"><span class="nav-icon">💳</span> Billing</a>
+            <a class="nav-item" href="#"><span class="nav-icon">🔔</span> Notifications</a>
+            <a class="nav-item" href="#"><span class="nav-icon">⚙️</span> Settings</a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar">👩</div>
+                <div><div class="user-name">Priya Mehta</div><div class="user-role">Pet Owner</div></div>
+                <button class="logout-btn" onclick="window.location.href='login.html'">↩</button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <div class="page-title">Hi Priya! 🐾</div>
+                <div class="page-date">Tuesday, March 3, 2026 — Your pups are in good hands</div>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-amber">+ Book Service</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Hero -->
+            <div class="welcome-hero">
+                <div>
+                    <div class="wh-title">Welcome back, Priya! 🌟</div>
+                    <div class="wh-sub">Luna is currently at daycare. She was last reported as <strong style="color:rgba(250,240,200,0.9)">Healthy & Active</strong>.</div>
+                    <div class="wh-actions">
+                        <button class="btn btn-amber">📅 Book Daycare</button>
+                        <button class="btn" style="background:rgba(255,255,255,0.1);color:var(--cream);border:none">+ Add Dog</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Dogs -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <div style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700">My Dogs</div>
+                <button class="btn btn-outline" style="font-size:12px;padding:7px 14px">+ Add Dog</button>
+            </div>
+
+            <div class="my-dogs-grid">
+                <div class="my-dog-card">
+                    <div class="mdc-header" style="background:linear-gradient(135deg,#F5A8A8,#E87070)">
+                        <span class="health-tag tag-poor">● Poor Health</span>
+                        <div class="mdc-emoji">🐩</div>
+                    </div>
+                    <div class="mdc-body">
+                        <div class="mdc-name">Luna</div>
+                        <div class="mdc-sub">Poodle · 2 yrs · Female</div>
+                        <div class="mdc-stats">
+                            <div class="mds"><div class="mds-label">Status</div><div class="mds-val">At Daycare 📍</div></div>
+                            <div class="mds"><div class="mds-label">Behaviour</div><div class="mds-val">🟡 Active</div></div>
+                            <div class="mds"><div class="mds-label">Vax Expiry</div><div class="mds-val">Mar 28</div></div>
+                            <div class="mds"><div class="mds-label">Total Visits</div><div class="mds-val">8 visits</div></div>
+                        </div>
+                        <div class="mdc-footer">
+                            <button class="mdc-btn">📋 Reports</button>
+                            <button class="mdc-btn primary">👁 View</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Dog Card -->
+                <div class="my-dog-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:var(--warm);border:2px dashed rgba(61,43,31,0.15);box-shadow:none;cursor:pointer" onclick="alert('Register new dog!')">
+                    <div style="font-size:40px;margin-bottom:14px;opacity:0.3">➕</div>
+                    <div style="font-weight:700;font-size:15px;color:rgba(61,43,31,0.5)">Add Another Dog</div>
+                    <div style="font-size:12px;color:rgba(61,43,31,0.35);margin-top:4px;text-align:center">Register your pup's profile</div>
+                </div>
+            </div>
+
+            <!-- Booking + Notifications -->
+            <div class="booking-layout">
+                <!-- Upcoming Bookings -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">My Upcoming Bookings</div>
+                        <span class="view-all">View All →</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="booking-item">
+                            <div class="bi-time"><div class="bi-time-val">09:30</div><div class="bi-time-ampm">AM TODAY</div></div>
+                            <div class="bi-emoji">🐩</div>
+                            <div class="bi-info">
+                                <div class="bi-name">Luna — Half Day Daycare</div>
+                                <div class="bi-meta">👷 Tom Baker · Mar 3, 2026</div>
+                            </div>
+                            <span class="status-badge badge-pending">Pending</span>
+                        </div>
+                        <div class="booking-item">
+                            <div class="bi-time"><div class="bi-time-val">08:00</div><div class="bi-time-ampm">AM FRI</div></div>
+                            <div class="bi-emoji">🐩</div>
+                            <div class="bi-info">
+                                <div class="bi-name">Luna — Full Day Daycare</div>
+                                <div class="bi-meta">👷 Maria Santos · Mar 7, 2026</div>
+                            </div>
+                            <span class="status-badge badge-confirmed">Confirmed</span>
+                        </div>
+
+                        <div style="border-top:1px solid rgba(61,43,31,0.06);padding-top:20px;margin-top:6px">
+                            <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:14px">Book a Service</div>
+
+                            <div style="margin-bottom:14px">
+                                <div class="form-label">Select Service</div>
+                                <div class="service-grid">
+                                    <div class="service-card selected" onclick="selectService(this)">
+                                        <div class="service-icon">🏡</div>
+                                        <div class="service-name">Full Day</div>
+                                        <div class="service-price">LKR 2,500</div>
+                                    </div>
+                                    <div class="service-card" onclick="selectService(this)">
+                                        <div class="service-icon">☀️</div>
+                                        <div class="service-name">Half Day</div>
+                                        <div class="service-price">LKR 1,800</div>
+                                    </div>
+                                    <div class="service-card" onclick="selectService(this)">
+                                        <div class="service-icon">✂️</div>
+                                        <div class="service-name">Grooming</div>
+                                        <div class="service-price">LKR 1,200</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="vax-alert" id="ownerVaxAlert">⚠️ Luna's vaccination expires on March 28. Please renew before booking beyond that date.</div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Date</label>
+                                    <input class="form-input" type="date" value="2026-03-07">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Time</label>
+                                    <select class="form-select">
+                                        <option>08:00 AM</option>
+                                        <option>09:30 AM</option>
+                                        <option>11:00 AM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" style="width:100%" onclick="document.getElementById('ownerVaxAlert').style.display='block';alert('✅ Booking submitted! Awaiting admin confirmation.')">Confirm Booking →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div class="card" style="animation-delay:0.3s">
+                    <div class="card-header">
+                        <div class="card-title">Notifications</div>
+                        <span class="view-all">Mark all read</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="notif-list">
+                            <div class="notif-item notif-vax">
+                                <div class="notif-title">💉 Vaccination Reminder</div>
+                                <div class="notif-desc">Luna's rabies vaccine expires in 25 days. Please schedule renewal.</div>
+                                <div class="notif-time">Today, 6:00 AM</div>
+                            </div>
+                            <div class="notif-item notif-health">
+                                <div class="notif-title">🏥 Visit Report Available</div>
+                                <div class="notif-desc">Luna's health report from today is ready. Caretaker: Tom Baker.</div>
+                                <div class="notif-time">Today, 2:00 PM</div>
+                            </div>
+                            <div class="notif-item notif-health">
+                                <div class="notif-title">📋 Doctor Visit Arranged</div>
+                                <div class="notif-desc">Dr. Perera has confirmed 4:00 PM checkup for Luna's lethargy issue.</div>
+                                <div class="notif-time">Today, 11:30 AM</div>
+                            </div>
+                            <div class="notif-item notif-vax">
+                                <div class="notif-title">✅ Booking Confirmed</div>
+                                <div class="notif-desc">Your booking for March 7 (Full Day) has been confirmed by admin.</div>
+                                <div class="notif-time">Yesterday</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function selectService(el){
+        document.querySelectorAll('.service-card').forEach(c=>c.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+</script>
+</body>
+</html>
