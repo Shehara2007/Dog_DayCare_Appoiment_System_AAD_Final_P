@@ -1,50 +1,68 @@
 package org.example.backend.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.backend.EnumPackage.AppointmentStatus;
-import org.example.backend.dto.AppointmentDTOs;
-import org.example.backend.service.AppointmentService;
+import org.example.backend.dto.AppointmentDTO;
+import org.example.backend.service.custom.AppointmentService;
+import org.example.backend.util.APIResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/appointments")
 @RequiredArgsConstructor
+@RequestMapping("api/v1/appointments")
+@CrossOrigin
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
 
     @PostMapping
-    public ResponseEntity<AppointmentDTOs.AppointmentResponse> bookAppointment(@Valid @RequestBody AppointmentDTOs.AppointmentRequest request) {
-        return ResponseEntity.ok(appointmentService.bookAppointment(request));
+    public ResponseEntity<APIResponse<String>> saveAppointment(@RequestBody AppointmentDTO dto) {
+        appointmentService.saveAppointment(dto);
+        return new ResponseEntity<>(new APIResponse<>(201, "Appointment Booked Successfully", null), HttpStatus.CREATED);
     }
 
-    @GetMapping("/my")
-    public ResponseEntity<List<AppointmentDTOs.AppointmentResponse>> getMyAppointments() {
-        return ResponseEntity.ok(appointmentService.getMyAppointments());
+    @PutMapping
+    public ResponseEntity<APIResponse<String>> updateAppointment(@RequestBody AppointmentDTO dto) {
+        appointmentService.updateAppointment(dto);
+        return new ResponseEntity<>(new APIResponse<>(200, "Appointment Updated Successfully", null), HttpStatus.OK);
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<AppointmentDTOs.AppointmentResponse>> getAllAppointments() {
-        return ResponseEntity.ok(appointmentService.getAllAppointments());
+    public ResponseEntity<APIResponse<List<AppointmentDTO>>> getAllAppointments() {
+        List<AppointmentDTO> appointments = appointmentService.getAllAppointments();
+        return new ResponseEntity<>(new APIResponse<>(200, "Success", appointments), HttpStatus.OK);
     }
 
-    @GetMapping("/caretaker")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CARETAKER')")
-    public ResponseEntity<List<AppointmentDTOs.AppointmentResponse>> getCaretakerAppointments() {
-        return ResponseEntity.ok(appointmentService.getCaretakerAppointments());
+    @GetMapping("/{id}")
+    public ResponseEntity<APIResponse<AppointmentDTO>> getAppointmentById(@PathVariable int id) {
+        AppointmentDTO appointment = appointmentService.getAppointmentById(id);
+        return new ResponseEntity<>(new APIResponse<>(200, "Success", appointment), HttpStatus.OK);
     }
 
-    @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CARETAKER')")
-    public ResponseEntity<AppointmentDTOs.AppointmentResponse> updateStatus(
-            @PathVariable Long id,
-            @RequestParam AppointmentStatus status) {
-        return ResponseEntity.ok(appointmentService.updateStatus(id, status));
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<APIResponse<List<AppointmentDTO>>> getAppointmentsByOwner(@PathVariable int ownerId) {
+        List<AppointmentDTO> appointments = appointmentService.getAppointmentsByOwner(ownerId);
+        return new ResponseEntity<>(new APIResponse<>(200, "Success", appointments), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<APIResponse<String>> approveAppointment(@PathVariable int id) {
+        appointmentService.approveAppointment(id);
+        return new ResponseEntity<>(new APIResponse<>(200, "Appointment Approved", null), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<APIResponse<String>> rejectAppointment(@PathVariable int id) {
+        appointmentService.rejectAppointment(id);
+        return new ResponseEntity<>(new APIResponse<>(200, "Appointment Rejected", null), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<APIResponse<String>> deleteAppointment(@PathVariable int id) {
+        appointmentService.deleteAppointment(id);
+        return new ResponseEntity<>(new APIResponse<>(200, "Appointment Deleted Successfully", null), HttpStatus.OK);
     }
 }

@@ -1,12 +1,14 @@
 package org.example.backend.Repository;
 
 import org.example.backend.Entity.Dog;
-import org.example.backend.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
-public interface DogRepository extends JpaRepository<Dog, Long> {
-    List<Dog> findByOwner(User owner);
-    List<Dog> findByOwnerId(Long ownerId);
+@Repository
+public interface DogRepository extends JpaRepository<Dog, Integer> {
+    List<Dog> findByOwner_UserId(int ownerId);
+    List<Dog> findByVaccinationExpiryDateBefore(LocalDate date);
 }

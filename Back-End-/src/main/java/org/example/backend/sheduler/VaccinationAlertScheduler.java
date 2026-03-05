@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.backend.Repository.HealthReportRepository;
 import org.example.backend.Repository.VaccinationRepository;
 import org.example.backend.Entity.Vaccination;
-import org.example.backend.service.EmailService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

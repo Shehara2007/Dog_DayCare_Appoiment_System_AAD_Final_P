@@ -1,83 +1,56 @@
 package org.example.backend.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.backend.dto.AppointmentDTOs;
-import org.example.backend.dto.DogDTOs;
-import org.example.backend.service.DogService;
-import org.example.backend.service.HealthReportService;
-import org.example.backend.service.VaccinationService;
+import org.example.backend.dto.DogDTO;
+import org.example.backend.service.custom.DogService;
+import org.example.backend.util.APIResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/api/dogs")
 @RequiredArgsConstructor
+@RequestMapping("api/v1/dogs")
+@CrossOrigin
 public class DogController {
 
     private final DogService dogService;
-    private final HealthReportService healthReportService;
-    private final VaccinationService vaccinationService;
 
     @PostMapping
-    public ResponseEntity<DogDTOs.DogResponse> registerDog(@Valid @RequestBody DogDTOs.DogRequest request) {
-        return ResponseEntity.ok(dogService.registerDog(request));
+    public ResponseEntity<APIResponse<String>> saveDog(@RequestBody DogDTO dto) {
+        dogService.saveDog(dto);
+        return new ResponseEntity<>(new APIResponse<>(201, "Dog Registered Successfully", null), HttpStatus.CREATED);
     }
 
-    @GetMapping("/my")
-    public ResponseEntity<List<DogDTOs.DogResponse>> getMyDogs() {
-        return ResponseEntity.ok(dogService.getMyDogs());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<DogDTOs.DogResponse> getDogById(@PathVariable Long id) {
-        return ResponseEntity.ok(dogService.getDogById(id));
+    @PutMapping
+    public ResponseEntity<APIResponse<String>> updateDog(@RequestBody DogDTO dto) {
+        dogService.updateDog(dto);
+        return new ResponseEntity<>(new APIResponse<>(200, "Dog Updated Successfully", null), HttpStatus.OK);
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<DogDTOs.DogResponse>> getAllDogs() {
-        return ResponseEntity.ok(dogService.getAllDogs());
+    public ResponseEntity<APIResponse<List<DogDTO>>> getAllDogs() {
+        List<DogDTO> dogs = dogService.getAllDogs();
+        return new ResponseEntity<>(new APIResponse<>(200, "Success", dogs), HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<DogDTOs.DogResponse> updateDog(@PathVariable Long id, @Valid @RequestBody DogDTOs.DogRequest request) {
-        return ResponseEntity.ok(dogService.updateDog(id, request));
+    @GetMapping("/{id}")
+    public ResponseEntity<APIResponse<DogDTO>> getDogById(@PathVariable int id) {
+        DogDTO dog = dogService.getDogById(id);
+        return new ResponseEntity<>(new APIResponse<>(200, "Success", dog), HttpStatus.OK);
+    }
+
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<APIResponse<List<DogDTO>>> getDogsByOwner(@PathVariable int ownerId) {
+        List<DogDTO> dogs = dogService.getDogsByOwner(ownerId);
+        return new ResponseEntity<>(new APIResponse<>(200, "Success", dogs), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> deleteDog(@PathVariable Long id) {
+    public ResponseEntity<APIResponse<String>> deleteDog(@PathVariable int id) {
         dogService.deleteDog(id);
-        return ResponseEntity.ok(Map.of("message", "Dog deleted successfully"));
-    }
-
-    // Health Reports
-    @GetMapping("/{id}/health-reports")
-    public ResponseEntity<List<AppointmentDTOs.HealthReportResponse>> getDogReports(@PathVariable Long id) {
-        return ResponseEntity.ok(healthReportService.getDogReports(id));
-    }
-
-    // Vaccinations
-    @GetMapping("/{id}/vaccinations")
-    public ResponseEntity<List<AppointmentDTOs.VaccinationResponse>> getDogVaccinations(@PathVariable Long id) {
-        return ResponseEntity.ok(vaccinationService.getDogVaccinations(id));
-    }
-
-    // Public QR endpoint
-    @GetMapping("/{id}/qr-public")
-    public ResponseEntity<Map<String, Object>> getPublicDogInfo(@PathVariable Long id) {
-        DogDTOs.DogResponse dog = dogService.getDogById(id);
-        List<AppointmentDTOs.HealthReportResponse> reports = healthReportService.getDogReports(id);
-        List<AppointmentDTOs.VaccinationResponse> vaccinations = vaccinationService.getDogVaccinations(id);
-        return ResponseEntity.ok(Map.of(
-                "dog", dog,
-                "healthReports", reports,
-                "vaccinations", vaccinations
-        ));
+        return new ResponseEntity<>(new APIResponse<>(200, "Dog Deleted Successfully", null), HttpStatus.OK);
     }
 }
