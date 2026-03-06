@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawCare — Health Reports</title>
+    <link rel="stylesheet" href="../../css/shared.css">
+    <style>.shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}</style>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main">
+        <div class="topbar">
+            <div><div class="page-title">📋 Health Reports</div><div class="page-sub">Behaviour & health assessment records</div></div>
+            <div class="topbar-right">
+                <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" id="searchInput" placeholder="Search dog…" oninput="filterTable()"></div>
+                <button class="btn btn-amber" onclick="openAdd()">+ Add Report</button>
+            </div>
+        </div>
+        <div class="content">
+            <!-- High risk alert -->
+            <div class="alert-banner alert-error fade-1" id="riskAlert" style="display:none">
+                🔥 <strong>Rocky</strong> has been flagged <strong>HIGH RISK</strong> — 3+ DANGEROUS behaviour reports! Immediate action required.
+            </div>
+
+            <div class="stats-grid fade-1" style="grid-template-columns:repeat(4,1fr)">
+                <div class="stat-card"><div class="stat-icon bark">📋</div><div><div class="stat-value" id="sc_total">0</div><div class="stat-label">Total Reports</div></div></div>
+                <div class="stat-card"><div class="stat-icon sage">🟢</div><div><div class="stat-value" id="sc_good">0</div><div class="stat-label">Good Health</div></div></div>
+                <div class="stat-card"><div class="stat-icon rust">🔴</div><div><div class="stat-value" id="sc_bad">0</div><div class="stat-label">Bad Health</div></div></div>
+                <div class="stat-card"><div class="stat-icon rust">⚠️</div><div><div class="stat-value" id="sc_danger">0</div><div class="stat-label">Dangerous Behaviour</div></div></div>
+            </div>
+
+            <div class="filter-bar fade-2">
+                <button class="filter-chip active" onclick="setFilter(this,'ALL')">All</button>
+                <button class="filter-chip" onclick="setFilter(this,'FRIENDLY')">🟢 Friendly</button>
+                <button class="filter-chip" onclick="setFilter(this,'ACTIVE')">🟡 Active</button>
+                <button class="filter-chip" onclick="setFilter(this,'DANGEROUS')">🔴 Dangerous</button>
+                <button class="filter-chip" onclick="setFilter(this,'GOOD')">✅ Good Health</button>
+                <button class="filter-chip" onclick="setFilter(this,'BAD')">❌ Bad Health</button>
+            </div>
+
+            <div class="table-wrap fade-3">
+                <table>
+                    <thead><tr><th>Dog</th><th>Report Date</th><th>Behaviour</th><th>Health</th><th>Eating</th><th>Reported By</th><th>Notes</th><th>Actions</th></tr></thead>
+                    <tbody id="reportTbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="reportModal" onclick="if(event.target===this)Modal.close('reportModal')">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">📋 New Health Report</div>
+            <button class="modal-close" onclick="Modal.close('reportModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="reportId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Dog</label>
+                    <select id="f_dogId" class="form-control">
+                        <option value="">Select dog…</option>
+                        <option value="1">🐶 Buddy</option><option value="2">🐩 Luna</option>
+                        <option value="3">🐕‍🦺 Max</option><option value="4">🦮 Coco</option>
+                        <option value="5">🐶 Bella</option><option value="6">🐾 Rocky</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Report Date</label>
+                    <input id="f_date" class="form-control" type="date">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Behaviour Type</label>
+                    <select id="f_behaviour" class="form-control">
+                        <option value="FRIENDLY">🟢 Friendly</option>
+                        <option value="ACTIVE">🟡 Active</option>
+                        <option value="DANGEROUS">🔴 Dangerous</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Health Status</label>
+                    <select id="f_health" class="form-control">
+                        <option value="GOOD">✅ Good</option>
+                        <option value="BAD">❌ Bad</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Eating Behaviour</label>
+                    <select id="f_eating" class="form-control">
+                        <option value="NORMAL">Normal</option>
+                        <option value="REDUCED">Reduced Appetite</option>
+                        <option value="REFUSED">Refused to Eat</option>
+                        <option value="EXCESSIVE">Excessive Eating</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reported By (User ID)</label>
+                    <input id="f_reportedBy" class="form-control" type="number" placeholder="Caretaker ID">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea id="f_notes" class="form-control" placeholder="Detailed observations…"></textarea>
+            </div>
+            <div id="dangerWarning" class="alert-banner alert-error" style="display:none">
+                ⚠️ You are reporting DANGEROUS behaviour. This may trigger a risk level upgrade for this dog.
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="Modal.close('reportModal')">Cancel</button>
+            <button class="btn btn-amber" onclick="saveReport()">💾 Save Report</button>
+        </div>
+    </div>
+</div>
+
+<script src="../js/shared.js"></script><script src="../js/sidebar.js"></script>
+<script>
+    injectSidebar('health-reports.html');
+
+    let reports = [
+        {reportId:1, dogId:1, dogName:'Buddy', reportDate:'2026-03-02', behavior:'FRIENDLY', healthStatus:'GOOD', eatingBehaviour:'NORMAL', reportedByName:'Maria Santos', notes:'Played well with others.'},
+        {reportId:2, dogId:2, dogName:'Luna',  reportDate:'2026-03-03', behavior:'ACTIVE',   healthStatus:'BAD',  eatingBehaviour:'REDUCED',reportedByName:'Tom Baker',   notes:'Skin irritation noticed.'},
+        {reportId:3, dogId:6, dogName:'Rocky', reportDate:'2026-03-01', behavior:'DANGEROUS',healthStatus:'GOOD', eatingBehaviour:'NORMAL', reportedByName:'Kelly Park',  notes:'Growled at other dogs.'},
+        {reportId:4, dogId:6, dogName:'Rocky', reportDate:'2026-03-03', behavior:'DANGEROUS',healthStatus:'GOOD', eatingBehaviour:'NORMAL', reportedByName:'Maria Santos',notes:'Tried to bite during play.'},
+        {reportId:5, dogId:6, dogName:'Rocky', reportDate:'2026-03-04', behavior:'DANGEROUS',healthStatus:'BAD',  eatingBehaviour:'REFUSED',reportedByName:'Tom Baker',   notes:'Aggressive — separated.'},
+    ];
+
+    let filterStatus='ALL';
+
+    function renderTable(data) {
+        const tbody = document.getElementById('reportTbody');
+        if (!data.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">No reports found</td></tr>'; return; }
+        tbody.innerHTML = data.map(r => {
+            const borderColor = {FRIENDLY:'var(--sage)',ACTIVE:'var(--amber)',DANGEROUS:'var(--rust)'}[r.behavior]||'var(--sky)';
+            return `<tr style="border-left:3px solid ${borderColor}">
+      <td><strong>${r.dogName}</strong></td>
+      <td>${r.reportDate}</td>
+      <td>${statusBadge(r.behavior)}</td>
+      <td>${statusBadge(r.healthStatus)}</td>
+      <td><span class="badge badge-bark">${r.eatingBehaviour||'—'}</span></td>
+      <td>${r.reportedByName||'—'}</td>
+      <td style="max-width:160px;font-size:12px;color:var(--text-muted)">${r.notes||'—'}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-sm btn-sky btn-icon" title="Edit" onclick="openEdit(${r.reportId})">✏️</button>
+        <button class="btn btn-sm btn-rust btn-icon" title="Delete" onclick="deleteReport(${r.reportId})">🗑</button>
+      </div></td>
+    </tr>`;
+        }).join('');
+        // Show risk alert if Rocky has 3+ dangerous
+        const dangerCount = reports.filter(r=>r.dogId===6&&r.behavior==='DANGEROUS').length;
+        document.getElementById('riskAlert').style.display = dangerCount>=3 ? 'flex':'none';
+    }
+
+    function filterTable() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        let data = reports;
+        if (filterStatus==='GOOD'||filterStatus==='BAD') data=data.filter(r=>r.healthStatus===filterStatus);
+        else if (filterStatus!=='ALL') data=data.filter(r=>r.behavior===filterStatus);
+        if (q) data=data.filter(r=>r.dogName.toLowerCase().includes(q));
+        renderTable(data);
+    }
+
+    function setFilter(el,f){filterStatus=f;document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');filterTable();}
+
+    document.getElementById('f_behaviour')?.addEventListener('change',function(){
+        document.getElementById('dangerWarning').style.display=this.value==='DANGEROUS'?'flex':'none';
+    });
+
+    function openAdd() {
+        document.getElementById('reportId').value='';
+        ['f_dogId','f_reportedBy','f_notes'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('f_date').valueAsDate=new Date();
+        document.getElementById('f_behaviour').value='FRIENDLY';
+        document.getElementById('f_health').value='GOOD';
+        document.getElementById('f_eating').value='NORMAL';
+        document.getElementById('dangerWarning').style.display='none';
+        document.getElementById('modalTitle').textContent='📋 New Health Report';
+        Modal.open('reportModal');
+    }
+
+    function openEdit(id) {
+        const r=reports.find(x=>x.reportId===id); if(!r) return;
+        document.getElementById('reportId').value=r.reportId;
+        document.getElementById('f_dogId').value=r.dogId;
+        document.getElementById('f_date').value=r.reportDate;
+        document.getElementById('f_behaviour').value=r.behavior;
+        document.getElementById('f_health').value=r.healthStatus;
+        document.getElementById('f_eating').value=r.eatingBehaviour||'NORMAL';
+        document.getElementById('f_notes').value=r.notes||'';
+        document.getElementById('modalTitle').textContent='✏️ Edit Report';
+        Modal.open('reportModal');
+    }
+
+    async function saveReport() {
+        const id=document.getElementById('reportId').value;
+        const body={
+            dogId:parseInt(document.getElementById('f_dogId').value)||0,
+            reportDate:document.getElementById('f_date').value,
+            behaviourType:document.getElementById('f_behaviour').value,
+            healthStatus:document.getElementById('f_health').value,
+            eatingBehaviour:document.getElementById('f_eating').value,
+            reportedById:parseInt(document.getElementById('f_reportedBy').value)||0,
+            notes:document.getElementById('f_notes').value,
+        };
+        if(!body.dogId){Toast.warn('Select a dog');return;}
+        try {if(id){body.reportId=parseInt(id);await API.put('/reports',body);}else{await API.post('/reports',body);}} catch{}
+        const dogNames={1:'Buddy',2:'Luna',3:'Max',4:'Coco',5:'Bella',6:'Rocky'};
+        if(id){
+            const idx=reports.findIndex(r=>r.reportId===parseInt(id));
+            if(idx>=0) reports[idx]={...reports[idx],behavior:body.behaviourType,...body,dogName:dogNames[body.dogId]||'Dog '+body.dogId};
+            Toast.success('Report updated!');
+        } else {
+            body.reportId=reports.length+1;body.behavior=body.behaviourType;body.dogName=dogNames[body.dogId]||'Dog '+body.dogId;body.reportedByName='Staff';
+            reports.push(body);Toast.success('Report saved!');
+        }
+        Modal.close('reportModal');filterTable();updateStats();
+    }
+
+    async function deleteReport(id) {
+        Modal.confirm('Delete this report?',async()=>{
+            try{await API.delete('/reports/'+id);}catch{}
+            reports=reports.filter(r=>r.reportId!==id);Toast.success('Deleted.');filterTable();updateStats();
+        });
+    }
+
+    function updateStats() {
+        document.getElementById('sc_total').textContent  = reports.length;
+        document.getElementById('sc_good').textContent   = reports.filter(r=>r.healthStatus==='GOOD').length;
+        document.getElementById('sc_bad').textContent    = reports.filter(r=>r.healthStatus==='BAD').length;
+        document.getElementById('sc_danger').textContent = reports.filter(r=>r.behavior==='DANGEROUS').length;
+    }
+
+    filterTable();updateStats();
+</script>
+</body>
+</html>

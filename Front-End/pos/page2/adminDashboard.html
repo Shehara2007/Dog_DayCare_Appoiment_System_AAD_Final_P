@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawCare — Admin Dashboard</title>
+    <link rel="stylesheet" href="../../css/shared.css">
+    <style>
+        .shell { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100vh; }
+        .welcome-hero {
+            background: linear-gradient(135deg, var(--bark) 0%, var(--bark-light) 100%);
+            border-radius: 20px;
+            padding: 28px 32px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .welcome-hero::after { content: '🐾'; position: absolute; right: 24px; top: -10px; font-size: 100px; opacity: 0.07; }
+        .welcome-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
+        .welcome-sub   { font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 6px; }
+        .quick-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 24px; }
+        .quick-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 18px var(--shadow);
+            display: flex; align-items: center; gap: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--bark);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .quick-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px var(--shadow-deep); }
+        .quick-icon { width: 48px; height: 48px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+        .quick-label { font-weight: 600; font-size: 14px; }
+        .quick-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .alert-row { display: flex; flex-direction: column; gap: 8px; }
+        .alert-item {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--white); border-radius: 12px; padding: 13px 16px;
+            box-shadow: 0 1px 12px var(--shadow);
+            border-left: 4px solid;
+        }
+        .alert-item.warn  { border-color: var(--amber); }
+        .alert-item.error { border-color: var(--rust); }
+        .alert-item .al-text { font-size: 13px; font-weight: 500; }
+        .alert-item .al-time { margin-left: auto; font-size: 11px; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+<div class="shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <div class="page-title">Dashboard 🏠</div>
+                <div class="page-sub" id="todayDate"></div>
+            </div>
+            <div class="topbar-right">
+                <button class="btn btn-amber" onclick="window.location.href='dogs.html'">+ Register Dog</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Hero -->
+            <div class="welcome-hero fade-1">
+                <div>
+                    <div class="welcome-title">Good morning, <span id="adminName">Admin</span> 👋</div>
+                    <div class="welcome-sub">Here's what's happening at PawCare today</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:var(--amber-light);" id="heroCount">—</div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.5);">Dogs in care today</div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid fade-2">
+                <div class="stat-card">
+                    <div class="stat-icon amber">🐕</div>
+                    <div><div class="stat-value" id="sc1">0</div><div class="stat-label">Registered Dogs</div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon sage">📅</div>
+                    <div><div class="stat-value" id="sc2">0</div><div class="stat-label">Today's Appointments</div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon rust">💉</div>
+                    <div><div class="stat-value" id="sc3">0</div><div class="stat-label">Vax Expiring Soon</div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon sky">🩺</div>
+                    <div><div class="stat-value" id="sc4">0</div><div class="stat-label">Doctor Appointments</div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bark">📋</div>
+                    <div><div class="stat-value" id="sc5">0</div><div class="stat-label">Health Reports</div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon amber">👤</div>
+                    <div><div class="stat-value" id="sc6">0</div><div class="stat-label">Pet Owners</div></div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card fade-3 mb-24">
+                <div class="card-header"><div class="card-title">⚡ Quick Actions</div></div>
+                <div class="card-body">
+                    <div class="quick-grid">
+                        <a href="dogProfile.html" class="quick-card">
+                            <div class="quick-icon" style="background:var(--amber-pale)">🐕</div>
+                            <div><div class="quick-label">Manage Dogs</div><div class="quick-sub">View, add, update dogs</div></div>
+                        </a>
+                        <a href="appointments.html" class="quick-card">
+                            <div class="quick-icon" style="background:rgba(122,158,126,0.12)">📅</div>
+                            <div><div class="quick-label">Appointments</div><div class="quick-sub">Daycare bookings</div></div>
+                        </a>
+                        <a href="healthReport.html" class="quick-card">
+                            <div class="quick-icon" style="background:rgba(192,71,42,0.08)">📋</div>
+                            <div><div class="quick-label">Health Reports</div><div class="quick-sub">Behaviour & health</div></div>
+                        </a>
+                        <a href="vaccinations.html" class="quick-card">
+                            <div class="quick-icon" style="background:rgba(91,143,168,0.12)">💉</div>
+                            <div><div class="quick-label">Vaccinations</div><div class="quick-sub">Track & alert</div></div>
+                        </a>
+                        <a href="doctorAppointments.html" class="quick-card">
+                            <div class="quick-icon" style="background:rgba(122,158,126,0.12)">🩺</div>
+                            <div><div class="quick-label">Doctor Visits</div><div class="quick-sub">Vet appointments</div></div>
+                        </a>
+                        <a href="QRCode.html" class="quick-card">
+                            <div class="quick-icon" style="background:rgba(61,43,31,0.07)">📱</div>
+                            <div><div class="quick-label">QR Codes</div><div class="quick-sub">Dog profile QRs</div></div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div class="card fade-4">
+                <div class="card-header"><div class="card-title">🔔 Active Alerts</div></div>
+                <div class="card-body">
+                    <div class="alert-row">
+                        <div class="alert-item warn">
+                            <span>💉</span>
+                            <div class="al-text">Buddy's Rabies vaccination expires in <strong>5 days</strong></div>
+                            <div class="al-time">Just now</div>
+                        </div>
+                        <div class="alert-item error">
+                            <span>🔥</span>
+                            <div class="al-text">Rocky has been flagged <strong>HIGH RISK</strong> — 3 dangerous reports</div>
+                            <div class="al-time">2h ago</div>
+                        </div>
+                        <div class="alert-item warn">
+                            <span>📋</span>
+                            <div class="al-text">Luna's health status reported as <strong>BAD</strong> — notify owner?</div>
+                            <div class="al-time">4h ago</div>
+                        </div>
+                        <div class="alert-item warn">
+                            <span>💉</span>
+                            <div class="al-text">Coco's Distemper vaccine expires in <strong>12 days</strong></div>
+                            <div class="al-time">Yesterday</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="shared.js"></script>
+<script>
+    // Inject admin sidebar
+    document.getElementById('sidebar').innerHTML = buildAdminSidebar('admin-dashboard.html');
+    document.getElementById('adminName').textContent = Auth.getUser().fullName || 'Admin';
+    document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+    // Animate counters
+    window.addEventListener('load', () => {
+        animateCount('heroCount', 14);
+        animateCount('sc1', 24);
+        animateCount('sc2', 9);
+        animateCount('sc3', 2);
+        animateCount('sc4', 5);
+        animateCount('sc5', 31);
+        animateCount('sc6', 18);
+    });
+
+    function buildAdminSidebar(activePage) {
+        const items = [
+            { href:'admin-dashboard.html', icon:'🏠', label:'Dashboard' },
+            { href:'dogs.html',             icon:'🐕', label:'Dogs' },
+            { href:'appointments.html',     icon:'📅', label:'Appointments', badge:3 },
+            { href:'health-reports.html',   icon:'📋', label:'Health Reports' },
+            { href:'vaccinations.html',     icon:'💉', label:'Vaccinations', badge:2 },
+            { href:'doctor-appointments.html', icon:'🩺', label:'Doctor Visits' },
+            { href:'qrcodes.html',          icon:'📱', label:'QR Codes' },
+        ];
+        const user = Auth.getUser();
+        return `
+      <div class="sidebar-brand">
+        <div class="brand-icon">🐾</div>
+        <div class="brand-text">
+          <div class="brand-name">PawCare</div>
+          <div class="brand-sub">Admin Panel</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">Main Menu</div>
+        ${items.map(i => `
+          <a href="${i.href}" class="nav-item ${i.href===activePage?'active':''}">
+            <span class="nav-icon">${i.icon}</span> ${i.label}
+            ${i.badge ? `<span class="nav-badge">${i.badge}</span>` : ''}
+          </a>`).join('')}
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-ava">👩‍💼</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarUserName">${user.fullName||'Admin'}</div>
+            <div class="user-role">Administrator</div>
+          </div>
+          <button class="logout-btn" onclick="Auth.logout()" title="Logout">↩</button>
+        </div>
+      </div>`;
+    }
+    window.buildAdminSidebar = buildAdminSidebar;
+</script>
+</body>
+</html>

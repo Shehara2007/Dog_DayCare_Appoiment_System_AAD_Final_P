@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>PawCare — Appointments</title>
+    <link rel="stylesheet" href="../../css/shared.css">
+    <style>.shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}</style>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main">
+        <div class="topbar">
+            <div><div class="page-title">📅 Daycare Appointments</div><div class="page-sub">Manage all daycare bookings</div></div>
+            <div class="topbar-right">
+                <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" id="searchInput" placeholder="Search dog or owner…" oninput="filterTable()"></div>
+                <button class="btn btn-amber" onclick="openAdd()">+ New Appointment</button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="stats-grid fade-1" style="grid-template-columns:repeat(4,1fr)">
+                <div class="stat-card"><div class="stat-icon amber">📅</div><div><div class="stat-value" id="sc_total">0</div><div class="stat-label">Total</div></div></div>
+                <div class="stat-card"><div class="stat-icon sage">✅</div><div><div class="stat-value" id="sc_approved">0</div><div class="stat-label">Approved</div></div></div>
+                <div class="stat-card"><div class="stat-icon sky">⏳</div><div><div class="stat-value" id="sc_pending">0</div><div class="stat-label">Pending</div></div></div>
+                <div class="stat-card"><div class="stat-icon rust">❌</div><div><div class="stat-value" id="sc_cancelled">0</div><div class="stat-label">Cancelled</div></div></div>
+            </div>
+            <div class="filter-bar fade-2">
+                <button class="filter-chip active" onclick="setFilter(this,'ALL')">All</button>
+                <button class="filter-chip" onclick="setFilter(this,'PENDING')">⏳ Pending</button>
+                <button class="filter-chip" onclick="setFilter(this,'APPROVED')">✅ Approved</button>
+                <button class="filter-chip" onclick="setFilter(this,'CANCELLED')">❌ Cancelled</button>
+                <button class="filter-chip" onclick="setFilter(this,'COMPLETED')">✔ Completed</button>
+            </div>
+            <div class="table-wrap fade-3">
+                <table>
+                    <thead>
+                    <tr><th>Dog</th><th>Owner</th><th>Caretaker</th><th>Date & Time</th><th>Service</th><th>Status</th><th>Notes</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="apptTbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="apptModal" onclick="if(event.target===this)Modal.close('apptModal')">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">📅 New Appointment</div>
+            <button class="modal-close" onclick="Modal.close('apptModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="vaxWarn" class="alert-banner alert-warn" style="display:none">⚠️ This dog's vaccination is expiring soon! Please ensure renewal before the booking date.</div>
+            <input type="hidden" id="apptId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Dog</label>
+                    <select id="f_dogId" class="form-control" onchange="checkVax()">
+                        <option value="">Select dog…</option>
+                        <option value="1" data-vax="2026-03-08">🐶 Buddy (James K.) — ⚠️ Vax 5 days</option>
+                        <option value="2" data-vax="2026-03-28">🐩 Luna (Priya M.)</option>
+                        <option value="3" data-vax="2026-06-15">🐕‍🦺 Max (Anna L.)</option>
+                        <option value="4" data-vax="2026-03-17">🦮 Coco (David R.) — ⚠️ Vax 12 days</option>
+                        <option value="5" data-vax="2026-07-20">🐶 Bella (Sophie T.)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Caretaker</label>
+                    <select id="f_caretakerId" class="form-control">
+                        <option value="1">Maria Santos — 2/3 slots</option>
+                        <option value="2">Tom Baker — 3/3 FULL ⛔</option>
+                        <option value="3">Kelly Park — 1/3 slots ✅</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Appointment Date</label>
+                    <input id="f_date" class="form-control" type="date">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Time Slot</label>
+                    <select id="f_time" class="form-control">
+                        <option>08:00 AM</option><option>09:30 AM</option><option>11:00 AM</option>
+                        <option>01:00 PM</option><option>02:30 PM</option><option>04:00 PM</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Service</label>
+                    <select id="f_serviceId" class="form-control">
+                        <option value="1">Full Day Daycare — LKR 2,500</option>
+                        <option value="2">Half Day Daycare — LKR 1,800</option>
+                        <option value="3">Bath & Grooming — LKR 1,200</option>
+                        <option value="4">Training Session — LKR 2,000</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select id="f_status" class="form-control">
+                        <option value="PENDING">⏳ Pending</option>
+                        <option value="APPROVED">✅ Approved</option>
+                        <option value="CANCELLED">❌ Cancelled</option>
+                        <option value="COMPLETED">✔ Completed</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea id="f_notes" class="form-control" placeholder="Special instructions…"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="Modal.close('apptModal')">Cancel</button>
+            <button class="btn btn-amber" onclick="saveAppt()">💾 Save Appointment</button>
+        </div>
+    </div>
+</div>
+
+<script src="../js/shared.js"></script><script src="../js/sidebar.js"></script>
+<script>
+    injectSidebar('appointments.html');
+
+    let appts = [
+        {appointmentId:1, dogId:1, dogName:'Buddy',  ownerName:'James K.',  caretakerName:'Maria Santos', appointmentDateTime:'2026-03-05 08:00', serviceName:'Full Day',   status:'APPROVED',   notes:'First visit'},
+        {appointmentId:2, dogId:2, dogName:'Luna',   ownerName:'Priya M.',  caretakerName:'Tom Baker',    appointmentDateTime:'2026-03-05 09:30', serviceName:'Half Day',   status:'PENDING',    notes:''},
+        {appointmentId:3, dogId:3, dogName:'Max',    ownerName:'Anna L.',   caretakerName:'Maria Santos', appointmentDateTime:'2026-03-05 11:00', serviceName:'Full Day',   status:'APPROVED',   notes:'Bring favourite toy'},
+        {appointmentId:4, dogId:4, dogName:'Coco',   ownerName:'David R.',  caretakerName:'Kelly Park',   appointmentDateTime:'2026-03-05 14:00', serviceName:'Bath & Groom',status:'CANCELLED', notes:'Owner cancelled'},
+        {appointmentId:5, dogId:5, dogName:'Bella',  ownerName:'Sophie T.', caretakerName:'Tom Baker',    appointmentDateTime:'2026-03-05 15:30', serviceName:'Full Day',   status:'PENDING',    notes:''},
+    ];
+
+    let filterStatus = 'ALL';
+
+    function renderTable(data) {
+        const tbody = document.getElementById('apptTbody');
+        if (!data.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">No appointments found</td></tr>'; return; }
+        tbody.innerHTML = data.map(a => `<tr data-status="${a.status}">
+    <td><strong>${a.dogName}</strong></td>
+    <td>${a.ownerName}</td>
+    <td>${a.caretakerName}</td>
+    <td>${a.appointmentDateTime}</td>
+    <td>${a.serviceName}</td>
+    <td>${statusBadge(a.status)}</td>
+    <td style="max-width:160px;font-size:12px;color:var(--text-muted)">${a.notes||'—'}</td>
+    <td><div class="td-actions">
+      ${a.status==='PENDING'?`<button class="btn btn-sm btn-sage btn-icon" title="Approve" onclick="updateStatus(${a.appointmentId},'APPROVED')">✓</button>
+      <button class="btn btn-sm btn-rust btn-icon" title="Cancel" onclick="updateStatus(${a.appointmentId},'CANCELLED')">✕</button>`:
+            `<button class="btn btn-sm btn-sky btn-icon" title="Edit" onclick="openEdit(${a.appointmentId})">✏️</button>`}
+      <button class="btn btn-sm btn-rust btn-icon" title="Delete" onclick="deleteAppt(${a.appointmentId})">🗑</button>
+    </div></td>
+  </tr>`).join('');
+    }
+
+    function filterTable() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        let data = appts;
+        if (filterStatus !== 'ALL') data = data.filter(a => a.status === filterStatus);
+        if (q) data = data.filter(a => a.dogName.toLowerCase().includes(q)||(a.ownerName||'').toLowerCase().includes(q));
+        renderTable(data);
+    }
+
+    function setFilter(el,f) { filterStatus=f; document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); filterTable(); }
+
+    function checkVax() {
+        const sel = document.getElementById('f_dogId');
+        const opt = sel.options[sel.selectedIndex];
+        const vax = opt?.dataset?.vax;
+        const warn = document.getElementById('vaxWarn');
+        if (vax) { const days = Math.ceil((new Date(vax)-new Date())/(1000*60*60*24)); warn.style.display = days<=14?'flex':'none'; }
+        else warn.style.display='none';
+    }
+
+    function openAdd() {
+        document.getElementById('apptId').value='';
+        ['f_dogId','f_caretakerId','f_date','f_notes'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('f_date').valueAsDate = new Date();
+        document.getElementById('f_status').value='PENDING';
+        document.getElementById('vaxWarn').style.display='none';
+        document.getElementById('modalTitle').textContent='📅 New Appointment';
+        Modal.open('apptModal');
+    }
+
+    function openEdit(id) {
+        const a = appts.find(x=>x.appointmentId===id); if(!a) return;
+        document.getElementById('apptId').value=a.appointmentId;
+        document.getElementById('f_dogId').value=a.dogId;
+        document.getElementById('f_status').value=a.status;
+        document.getElementById('f_notes').value=a.notes||'';
+        document.getElementById('modalTitle').textContent='✏️ Edit Appointment';
+        Modal.open('apptModal');
+    }
+
+    async function saveAppt() {
+        const id = document.getElementById('apptId').value;
+        const body = {
+            dogId:      parseInt(document.getElementById('f_dogId').value)||0,
+            caretakerId:parseInt(document.getElementById('f_caretakerId').value)||0,
+            serviceId:  parseInt(document.getElementById('f_serviceId').value)||0,
+            appointmentDateTime: document.getElementById('f_date').value+' '+document.getElementById('f_time').value,
+            status:     document.getElementById('f_status').value,
+            notes:      document.getElementById('f_notes').value,
+        };
+        if (!body.dogId) { Toast.warn('Please select a dog'); return; }
+        try {
+            if (id) { body.appointmentId=parseInt(id); await API.put('/appointments',body); } else { await API.post('/appointments',body); }
+        } catch {}
+        if (id) {
+            const idx=appts.findIndex(a=>a.appointmentId===parseInt(id));
+            if(idx>=0) appts[idx]={...appts[idx],...body,dogName:appts[idx].dogName};
+            Toast.success('Appointment updated!');
+        } else {
+            body.appointmentId=appts.length+1; body.dogName='Dog '+body.dogId; body.ownerName='Owner'; body.caretakerName='Caretaker'; body.serviceName='Service';
+            appts.push(body); Toast.success('Appointment saved!');
+        }
+        Modal.close('apptModal'); filterTable(); updateStats();
+    }
+
+    async function updateStatus(id, status) {
+        try { await API.put('/appointments/'+id+(status==='APPROVED'?'/approve':'/reject'),{}); } catch {}
+        const idx=appts.findIndex(a=>a.appointmentId===id); if(idx>=0) appts[idx].status=status;
+        Toast.success('Status updated to '+status); filterTable(); updateStats();
+    }
+
+    async function deleteAppt(id) {
+        Modal.confirm('Delete this appointment?',async()=>{
+            try { await API.delete('/appointments/'+id); } catch {}
+            appts=appts.filter(a=>a.appointmentId!==id); Toast.success('Deleted.'); filterTable(); updateStats();
+        });
+    }
+
+    function updateStats() {
+        document.getElementById('sc_total').textContent    = appts.length;
+        document.getElementById('sc_approved').textContent = appts.filter(a=>a.status==='APPROVED').length;
+        document.getElementById('sc_pending').textContent  = appts.filter(a=>a.status==='PENDING').length;
+        document.getElementById('sc_cancelled').textContent= appts.filter(a=>a.status==='CANCELLED').length;
+    }
+
+    filterTable(); updateStats();
+</script>
+</body>
+</html></title>
+</head>
+<body>
+
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawCare — Doctor Dashboard</title>
+    <link rel="stylesheet" href="../../css/shared.css">
+    <style>
+        .shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
+        .visit-card{background:var(--white);border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:center;margin-bottom:10px;box-shadow:0 2px 12px var(--shadow);border-left:4px solid;transition:all 0.2s;cursor:pointer}
+        .visit-card:hover{transform:translateX(4px);box-shadow:0 6px 20px var(--shadow)}
+        .visit-card.confirmed{border-color:var(--sage)}
+        .visit-card.pending  {border-color:var(--amber)}
+        .visit-card.completed{border-color:var(--sky)}
+        .t-box{background:var(--warm);border-radius:10px;padding:8px 12px;text-align:center;min-width:56px;flex-shrink:0}
+        .t-h{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;line-height:1}
+        .t-ap{font-size:10px;color:var(--text-muted)}
+        .dog-info-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+        .detail-box{background:var(--white);border-radius:16px;box-shadow:0 2px 16px var(--shadow);padding:22px}
+        .detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--warm);font-size:13px}
+        .detail-row:last-child{border-bottom:none}
+        .detail-label{color:var(--text-muted);font-weight:500}
+        .detail-val{font-weight:600}
+    </style>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main">
+        <div class="topbar">
+            <div><div class="page-title">🩺 Doctor Dashboard</div><div class="page-sub" id="drDate"></div></div>
+            <div class="topbar-right">
+                <button class="btn btn-amber" onclick="window.location.href='health-reports.html'">📋 Add Health Report</button>
+                <button class="btn btn-primary" onclick="window.location.href='doctor-appointments.html'">📅 All Appointments</button>
+            </div>
+        </div>
+        <div class="content">
+            <!-- Hero -->
+            <div style="background:linear-gradient(135deg,var(--sky) 0%,var(--sky-light) 100%);border-radius:20px;padding:26px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden" class="fade-1">
+                <div style="position:absolute;right:20px;top:-10px;font-size:100px;opacity:0.08">🩺</div>
+                <div>
+                    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff">Good morning, Dr. <span id="drName">Doctor</span>!</div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.65);margin-top:4px">Your consultations for today, March 5, 2026</div>
+                </div>
+                <div style="display:flex;gap:24px">
+                    <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:#fff" id="h_visits">0</div><div style="font-size:11px;color:rgba(255,255,255,0.55)">Today's Visits</div></div>
+                    <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:#fff" id="h_pend">0</div><div style="font-size:11px;color:rgba(255,255,255,0.55)">Pending</div></div>
+                </div>
+            </div>
+
+            <div class="stats-grid fade-2" style="grid-template-columns:repeat(4,1fr)">
+                <div class="stat-card"><div class="stat-icon sky">🩺</div><div><div class="stat-value" id="sc_total">0</div><div class="stat-label">Total Appointments</div></div></div>
+                <div class="stat-card"><div class="stat-icon sage">✅</div><div><div class="stat-value" id="sc_conf">0</div><div class="stat-label">Confirmed</div></div></div>
+                <div class="stat-card"><div class="stat-icon amber">⏳</div><div><div class="stat-value" id="sc_pend">0</div><div class="stat-label">Pending</div></div></div>
+                <div class="stat-card"><div class="stat-icon bark">✔</div><div><div class="stat-value" id="sc_done">0</div><div class="stat-label">Completed</div></div></div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start">
+                <!-- Schedule -->
+                <div class="fade-3">
+                    <div class="flex-between mb-16">
+                        <h2 class="font-serif" style="font-size:20px">📋 Today's Consultations</h2>
+                        <a href="doctorAppointments.html" class="btn btn-outline btn-sm">Full Schedule →</a>
+                    </div>
+
+                    <div class="visit-card confirmed" onclick="showDetail('buddy')">
+                        <div class="t-box"><div class="t-h">09:00</div><div class="t-ap">AM</div></div>
+                        <div style="font-size:26px">🐶</div>
+                        <div style="flex:1">
+                            <div style="font-weight:700;font-size:14px">Buddy — Annual Checkup</div>
+                            <div class="dog-info-row">
+                                <span class="badge badge-green">🛡 Low Risk</span>
+                                <span class="badge badge-green">🟢 Friendly</span>
+                                <span class="badge badge-amber">⚠️ Vax 5d</span>
+                            </div>
+                            <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Owner: James K. · Golden Retriever, 3yr, Male</div>
+                        </div>
+                        <span class="badge badge-green">✅ Confirmed</span>
+                    </div>
+
+                    <div class="visit-card pending" onclick="showDetail('luna')">
+                        <div class="t-box"><div class="t-h">10:30</div><div class="t-ap">AM</div></div>
+                        <div style="font-size:26px">🐩</div>
+                        <div style="flex:1">
+                            <div style="font-weight:700;font-size:14px">Luna — Skin Irritation</div>
+                            <div class="dog-info-row">
+                                <span class="badge badge-amber">⚡ Med Risk</span>
+                                <span class="badge badge-amber">🟡 Active</span>
+                                <span class="badge badge-rust">⚠️ BAD Health</span>
+                            </div>
+                            <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Owner: Priya M. · Poodle, 2yr, Female</div>
+                        </div>
+                        <div style="display:flex;gap:6px">
+                            <button class="btn btn-sm btn-sage" onclick="event.stopPropagation();confirmAppt(this)">✓ Confirm</button>
+                            <span class="badge badge-amber">⏳ Pending</span>
+                        </div>
+                    </div>
+
+                    <div class="visit-card confirmed" onclick="showDetail('max')">
+                        <div class="t-box"><div class="t-h">11:00</div><div class="t-ap">AM</div></div>
+                        <div style="font-size:26px">🐕‍🦺</div>
+                        <div style="flex:1">
+                            <div style="font-weight:700;font-size:14px">Max — Vaccination Update</div>
+                            <div class="dog-info-row">
+                                <span class="badge badge-green">🛡 Low Risk</span>
+                                <span class="badge badge-green">🟢 Friendly</span>
+                            </div>
+                            <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Owner: Anna L. · Labrador, 5yr, Male</div>
+                        </div>
+                        <div style="display:flex;gap:6px">
+                            <button class="btn btn-sm btn-sky" onclick="event.stopPropagation();markDone(this)">✔ Done</button>
+                            <span class="badge badge-green">✅ Confirmed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dog Detail Panel -->
+                <div class="fade-3" id="detailPanelRight">
+                    <h2 class="font-serif mb-16" style="font-size:20px">🐶 Dog Details</h2>
+                    <div class="detail-box" id="detailContent">
+                        <div style="text-align:center;padding:20px;color:var(--text-muted);font-style:italic">Click a consultation to view dog details</div>
+                    </div>
+
+                    <!-- Quick Assessment -->
+                    <h2 class="font-serif mt-24 mb-16" style="font-size:18px">📋 Quick Assessment</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-group"><label class="form-label">Dog</label>
+                                <select id="qa_dog" class="form-control"><option value="1">🐶 Buddy</option><option value="2">🐩 Luna</option><option value="3">🐕‍🦺 Max</option></select>
+                            </div>
+                            <div class="form-group"><label class="form-label">Health Status</label>
+                                <select id="qa_hlt" class="form-control"><option value="GOOD">✅ Good</option><option value="BAD">❌ Bad — notify owner</option></select>
+                            </div>
+                            <div class="form-group"><label class="form-label">Clinical Notes</label>
+                                <textarea id="qa_notes" class="form-control" rows="3" placeholder="Diagnosis, treatment…"></textarea>
+                            </div>
+                            <button class="btn btn-amber full-w" style="justify-content:center" onclick="submitAssessment()">💾 Save Assessment</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="../js/shared.js"></script><script src="../js/sidebar.js"></script>
+<script>
+    injectSidebar('doctor-dashboard.html');
+    const user = Auth.getUser();
+    document.getElementById('drName').textContent = user.fullName?.split(' ').slice(-1)[0] || 'Doctor';
+    document.getElementById('drDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    animateCount('h_visits',3); animateCount('h_pend',1);
+    animateCount('sc_total',5); animateCount('sc_conf',3); animateCount('sc_pend',1); animateCount('sc_done',1);
+
+    const dogDetails = {
+        buddy: `<div style="text-align:center;margin-bottom:16px"><div style="font-size:44px;margin-bottom:8px">🐶</div><div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700">Buddy</div><div style="font-size:12px;color:var(--text-muted)">Golden Retriever · 3yr · Male</div></div>
+    <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-val">James K.</span></div>
+    <div class="detail-row"><span class="detail-label">Risk Level</span><span class="detail-val"><span class="badge badge-green">🛡 Low</span></span></div>
+    <div class="detail-row"><span class="detail-label">Behaviour</span><span class="detail-val">🟢 Friendly</span></div>
+    <div class="detail-row"><span class="detail-label">Vax Expiry</span><span class="detail-val" style="color:var(--rust)">⚠️ Mar 8, 2026</span></div>
+    <div class="detail-row"><span class="detail-label">Last Visit</span><span class="detail-val">Jan 12, 2026</span></div>
+    <div style="margin-top:14px"><button class="btn btn-amber full-w" style="justify-content:center" onclick="window.location.href='vaccinations.html'">💉 Update Vaccination</button></div>`,
+        luna: `<div style="text-align:center;margin-bottom:16px"><div style="font-size:44px;margin-bottom:8px">🐩</div><div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700">Luna</div><div style="font-size:12px;color:var(--text-muted)">Poodle · 2yr · Female</div></div>
+    <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-val">Priya M.</span></div>
+    <div class="detail-row"><span class="detail-label">Risk Level</span><span class="detail-val"><span class="badge badge-amber">⚡ Medium</span></span></div>
+    <div class="detail-row"><span class="detail-label">Health</span><span class="detail-val"><span class="badge badge-rust">❌ Bad</span></span></div>
+    <div class="detail-row"><span class="detail-label">Behaviour</span><span class="detail-val">🟡 Active</span></div>
+    <div class="detail-row"><span class="detail-label">Reason</span><span class="detail-val">Skin irritation, scratching</span></div>
+    <div style="margin-top:14px"><div class="alert-banner alert-error" style="margin:0">⚠️ Owner notification sent. Last report flagged BAD health.</div></div>`,
+        max: `<div style="text-align:center;margin-bottom:16px"><div style="font-size:44px;margin-bottom:8px">🐕‍🦺</div><div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700">Max</div><div style="font-size:12px;color:var(--text-muted)">Labrador · 5yr · Male</div></div>
+    <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-val">Anna L.</span></div>
+    <div class="detail-row"><span class="detail-label">Risk Level</span><span class="detail-val"><span class="badge badge-green">🛡 Low</span></span></div>
+    <div class="detail-row"><span class="detail-label">Health</span><span class="detail-val"><span class="badge badge-green">✅ Good</span></span></div>
+    <div class="detail-row"><span class="detail-label">Reason</span><span class="detail-val">Rabies booster overdue</span></div>
+    <div class="detail-row"><span class="detail-label">Total Visits</span><span class="detail-val">22</span></div>
+    <div style="margin-top:14px"><button class="btn btn-amber full-w" style="justify-content:center" onclick="window.location.href='vaccinations.html'">💉 Add Vaccination</button></div>`,
+    };
+
+    function showDetail(dog) {
+        document.getElementById('detailContent').innerHTML = dogDetails[dog] || '<div style="text-align:center;padding:20px;color:var(--text-muted)">No details available</div>';
+        const sel = {buddy:'1',luna:'2',max:'3'};
+        document.getElementById('qa_dog').value = sel[dog]||'1';
+    }
+
+    function confirmAppt(btn) {
+        const card=btn.closest('.visit-card'); card.className='visit-card confirmed';
+        card.querySelector('.badge')?.remove(); btn.remove();
+        Toast.success('Appointment confirmed!');
+    }
+
+    function markDone(btn) {
+        const card=btn.closest('.visit-card'); card.className='visit-card completed';
+        btn.remove(); Toast.success('Marked as completed!');
+    }
+
+    async function submitAssessment() {
+        const hlt=document.getElementById('qa_hlt').value;
+        try{await API.post('/reports',{dogId:parseInt(document.getElementById('qa_dog').value),reportDate:new Date().toISOString().split('T')[0],behaviourType:'FRIENDLY',healthStatus:hlt,notes:document.getElementById('qa_notes').value});}catch{}
+        if(hlt==='BAD') Toast.warn('⚠️ Bad health flagged — owner notification sent automatically!');
+        else Toast.success('Assessment saved!');
+        document.getElementById('qa_notes').value='';
+    }
+</script>
+</body>
+</html>

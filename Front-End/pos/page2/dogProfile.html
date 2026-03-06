@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawCare — Dogs</title>
+    <link rel="stylesheet" href="../../css/shared.css">
+    <style>
+        .shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
+        .dog-thumb{width:36px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:20px;background:var(--warm)}
+        .risk-cell{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+        .risk-low  {background:rgba(122,158,126,0.12);color:#3A6B3E}
+        .risk-med  {background:rgba(212,130,10,0.10);color:#8B5E00}
+        .risk-high {background:rgba(192,71,42,0.12);color:var(--rust)}
+    </style>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <div class="page-title">🐕 Dogs</div>
+                <div class="page-sub">Register and manage all dogs</div>
+            </div>
+            <div class="topbar-right">
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input class="search-input" id="searchInput" placeholder="Search dog or owner…" oninput="filterTable()">
+                </div>
+                <button class="btn btn-amber" onclick="openAdd()">+ Register Dog</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Stats row -->
+            <div class="stats-grid fade-1" style="grid-template-columns:repeat(4,1fr)">
+                <div class="stat-card"><div class="stat-icon amber">🐕</div><div><div class="stat-value" id="sc_total">0</div><div class="stat-label">Total Dogs</div></div></div>
+                <div class="stat-card"><div class="stat-icon sage">🟢</div><div><div class="stat-value" id="sc_healthy">0</div><div class="stat-label">Healthy</div></div></div>
+                <div class="stat-card"><div class="stat-icon rust">🔥</div><div><div class="stat-value" id="sc_high">0</div><div class="stat-label">High Risk</div></div></div>
+                <div class="stat-card"><div class="stat-icon sky">💉</div><div><div class="stat-value" id="sc_vax">0</div><div class="stat-label">Vax Expiring</div></div></div>
+            </div>
+
+            <!-- Filter -->
+            <div class="filter-bar fade-2">
+                <button class="filter-chip active" onclick="setFilter(this,'ALL')">All</button>
+                <button class="filter-chip" onclick="setFilter(this,'FRIENDLY')">🟢 Friendly</button>
+                <button class="filter-chip" onclick="setFilter(this,'ACTIVE')">🟡 Active</button>
+                <button class="filter-chip" onclick="setFilter(this,'DANGEROUS')">🔴 Dangerous</button>
+                <button class="filter-chip" onclick="setFilter(this,'HIGH')">🔥 High Risk</button>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrap fade-3">
+                <table id="dogsTable">
+                    <thead>
+                    <tr>
+                        <th>Dog</th>
+                        <th>Breed</th>
+                        <th>Age / Gender</th>
+                        <th>Owner</th>
+                        <th>Behaviour</th>
+                        <th>Risk Level</th>
+                        <th>Vax Expiry</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="dogsTbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="dogModal" onclick="if(event.target===this)Modal.close('dogModal')">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">🐕 Register New Dog</div>
+            <button class="modal-close" onclick="Modal.close('dogModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="dogId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Dog Name *</label>
+                    <input id="f_name" class="form-control" placeholder="e.g. Buddy">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Breed</label>
+                    <input id="f_breed" class="form-control" placeholder="e.g. Golden Retriever">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Age (years)</label>
+                    <input id="f_age" class="form-control" type="number" min="0" max="25" placeholder="3">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gender</label>
+                    <select id="f_gender" class="form-control">
+                        <option value="">Select…</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Owner (User ID)</label>
+                    <input id="f_ownerId" class="form-control" type="number" placeholder="Owner ID">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Vaccination Expiry</label>
+                    <input id="f_vaxDate" class="form-control" type="date">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Behaviour Type</label>
+                    <select id="f_behaviour" class="form-control">
+                        <option value="FRIENDLY">🟢 Friendly</option>
+                        <option value="ACTIVE">🟡 Active</option>
+                        <option value="DANGEROUS">🔴 Dangerous</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Health Status</label>
+                    <select id="f_health" class="form-control">
+                        <option value="HEALTHY">✅ Healthy</option>
+                        <option value="MINOR_ISSUE">⚠️ Minor Issue</option>
+                        <option value="SERIOUS_ISSUE">🚨 Serious Issue</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Special Notes</label>
+                <textarea id="f_notes" class="form-control" placeholder="Any special care instructions…"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="Modal.close('dogModal')">Cancel</button>
+            <button class="btn btn-amber" onclick="saveDog()">💾 Save Dog</button>
+        </div>
+    </div>
+</div>
+
+<script src="../js/shared.js"></script>
+<script src="../js/sidebar.js"></script>
+<script>
+    injectSidebar('dogs.html');
+
+    // ---- Demo data ----
+    let dogs = [
+        { dogId:1, dogName:'Buddy',  breed:'Golden Retriever', age:3, gender:'MALE',   ownerId:1, ownerName:'James K.',    behaviourType:'FRIENDLY',  healthStatus:'HEALTHY',      riskLevel:'LOW',  vaccinationExpiryDate:'2026-03-08' },
+        { dogId:2, dogName:'Luna',   breed:'Poodle',           age:2, gender:'FEMALE', ownerId:2, ownerName:'Priya M.',    behaviourType:'ACTIVE',    healthStatus:'MINOR_ISSUE',  riskLevel:'MEDIUM', vaccinationExpiryDate:'2026-03-28' },
+        { dogId:3, dogName:'Max',    breed:'Labrador',         age:5, gender:'MALE',   ownerId:3, ownerName:'Anna L.',     behaviourType:'FRIENDLY',  healthStatus:'HEALTHY',      riskLevel:'LOW',  vaccinationExpiryDate:'2026-06-15' },
+        { dogId:4, dogName:'Coco',   breed:'Beagle',           age:4, gender:'FEMALE', ownerId:4, ownerName:'David R.',    behaviourType:'FRIENDLY',  healthStatus:'HEALTHY',      riskLevel:'LOW',  vaccinationExpiryDate:'2026-03-17' },
+        { dogId:5, dogName:'Bella',  breed:'Husky',            age:2, gender:'FEMALE', ownerId:5, ownerName:'Sophie T.',   behaviourType:'ACTIVE',    healthStatus:'HEALTHY',      riskLevel:'LOW',  vaccinationExpiryDate:'2026-07-20' },
+        { dogId:6, dogName:'Rocky',  breed:'German Shepherd',  age:6, gender:'MALE',   ownerId:6, ownerName:'Mike R.',     behaviourType:'DANGEROUS', healthStatus:'SERIOUS_ISSUE',riskLevel:'HIGH', vaccinationExpiryDate:'2026-04-10' },
+    ];
+
+    let filterStatus = 'ALL';
+
+    function renderTable(data) {
+        const tbody = document.getElementById('dogsTbody');
+        if (!data.length) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">No dogs found</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = data.map(d => {
+            const riskClass = {LOW:'risk-low',MEDIUM:'risk-med',HIGH:'risk-high'}[d.riskLevel]||'risk-low';
+            const riskIcon  = {LOW:'🛡',MEDIUM:'⚡',HIGH:'🔥'}[d.riskLevel]||'🛡';
+            const today = new Date(); const exp = new Date(d.vaccinationExpiryDate);
+            const days  = Math.ceil((exp-today)/(1000*60*60*24));
+            const vaxColor = days<=7 ? 'color:var(--rust);font-weight:700' : days<=14 ? 'color:var(--amber);font-weight:700' : '';
+            const vaxText  = days<=7 ? `⚠️ ${days}d` : d.vaccinationExpiryDate;
+            return `<tr data-behaviour="${d.behaviourType}" data-risk="${d.riskLevel}">
+      <td><div style="display:flex;align-items:center;gap:10px"><div class="dog-thumb">🐶</div><strong>${d.dogName}</strong></div></td>
+      <td>${d.breed}</td>
+      <td>${d.age} yrs · ${d.gender==='MALE'?'♂ Male':'♀ Female'}</td>
+      <td>${d.ownerName||d.ownerId}</td>
+      <td>${statusBadge(d.behaviourType)}</td>
+      <td><span class="risk-cell ${riskClass}">${riskIcon} ${d.riskLevel}</span></td>
+      <td><span style="${vaxColor}">${vaxText}</span></td>
+      <td><div class="td-actions">
+        <button class="btn btn-sm btn-sky btn-icon" title="Edit" onclick="openEdit(${d.dogId})">✏️</button>
+        <button class="btn btn-sm btn-rust btn-icon" title="Delete" onclick="deleteDog(${d.dogId})">🗑</button>
+      </div></td>
+    </tr>`;
+        }).join('');
+    }
+
+    function filterTable() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        let data = dogs;
+        if (filterStatus !== 'ALL') {
+            if (filterStatus === 'HIGH') data = data.filter(d => d.riskLevel === 'HIGH');
+            else data = data.filter(d => d.behaviourType === filterStatus);
+        }
+        if (q) data = data.filter(d => d.dogName.toLowerCase().includes(q) || (d.ownerName||'').toLowerCase().includes(q) || d.breed.toLowerCase().includes(q));
+        renderTable(data);
+    }
+
+    function setFilter(el, f) {
+        filterStatus = f;
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        filterTable();
+    }
+
+    function openAdd() {
+        document.getElementById('dogId').value = '';
+        ['f_name','f_breed','f_age','f_gender','f_ownerId','f_vaxDate','f_notes'].forEach(id => document.getElementById(id).value='');
+        document.getElementById('f_behaviour').value = 'FRIENDLY';
+        document.getElementById('f_health').value = 'HEALTHY';
+        document.getElementById('modalTitle').textContent = '🐕 Register New Dog';
+        Modal.open('dogModal');
+    }
+
+    function openEdit(id) {
+        const d = dogs.find(x => x.dogId===id);
+        if (!d) return;
+        document.getElementById('dogId').value    = d.dogId;
+        document.getElementById('f_name').value   = d.dogName;
+        document.getElementById('f_breed').value  = d.breed;
+        document.getElementById('f_age').value    = d.age;
+        document.getElementById('f_gender').value = d.gender;
+        document.getElementById('f_ownerId').value= d.ownerId;
+        document.getElementById('f_vaxDate').value= d.vaccinationExpiryDate;
+        document.getElementById('f_behaviour').value = d.behaviourType;
+        document.getElementById('f_health').value = d.healthStatus;
+        document.getElementById('f_notes').value  = d.specialNotes||'';
+        document.getElementById('modalTitle').textContent = '✏️ Edit Dog';
+        Modal.open('dogModal');
+    }
+
+    async function saveDog() {
+        const id   = document.getElementById('dogId').value;
+        const body = {
+            dogName: document.getElementById('f_name').value,
+            breed:   document.getElementById('f_breed').value,
+            age:     parseInt(document.getElementById('f_age').value)||0,
+            gender:  document.getElementById('f_gender').value,
+            ownerId: parseInt(document.getElementById('f_ownerId').value)||0,
+            vaccinationExpiryDate: document.getElementById('f_vaxDate').value,
+            behaviourType: document.getElementById('f_behaviour').value,
+            healthStatus:  document.getElementById('f_health').value,
+            specialNotes:  document.getElementById('f_notes').value,
+        };
+
+        if (!body.dogName) { Toast.warn('Dog name is required'); return; }
+
+        try {
+            if (id) {
+                body.dogId = parseInt(id);
+                await API.put('/dogs', body);
+                const idx = dogs.findIndex(d => d.dogId===parseInt(id));
+                if (idx>=0) dogs[idx] = {...dogs[idx], ...body};
+                Toast.success('Dog updated successfully!');
+            } else {
+                await API.post('/dogs', body);
+                body.dogId = Date.now();
+                dogs.push(body);
+                Toast.success('Dog registered successfully!');
+            }
+        } catch {
+            // Demo mode — update local array
+            if (id) {
+                body.dogId = parseInt(id);
+                const idx = dogs.findIndex(d => d.dogId===parseInt(id));
+                if (idx>=0) dogs[idx] = {...dogs[idx],...body};
+                Toast.success('Dog updated! (demo)');
+            } else {
+                body.dogId = dogs.length+1;
+                body.ownerName = 'Owner '+body.ownerId;
+                dogs.push(body);
+                Toast.success('Dog registered! (demo)');
+            }
+        }
+        Modal.close('dogModal');
+        filterTable();
+        updateStats();
+    }
+
+    async function deleteDog(id) {
+        Modal.confirm('Delete this dog? This cannot be undone.', async () => {
+            try { await API.delete('/dogs/'+id); } catch {}
+            dogs = dogs.filter(d => d.dogId !== id);
+            Toast.success('Dog deleted.');
+            filterTable();
+            updateStats();
+        });
+    }
+
+    function updateStats() {
+        document.getElementById('sc_total').textContent   = dogs.length;
+        document.getElementById('sc_healthy').textContent = dogs.filter(d=>d.healthStatus==='HEALTHY').length;
+        document.getElementById('sc_high').textContent    = dogs.filter(d=>d.riskLevel==='HIGH').length;
+        const today = new Date();
+        document.getElementById('sc_vax').textContent = dogs.filter(d => {
+            const days = Math.ceil((new Date(d.vaccinationExpiryDate)-today)/(1000*60*60*24));
+            return days <= 30;
+        }).length;
+    }
+
+    // Init
+    filterTable();
+    updateStats();
+</script>
+</body>
+</html>

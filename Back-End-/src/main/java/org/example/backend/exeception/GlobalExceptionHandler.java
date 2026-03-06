@@ -1,57 +1,101 @@
 package org.example.backend.exeception;
 
+import org.example.backend.util.APIResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
-        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage());
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
-        return buildError(HttpStatus.UNAUTHORIZED, "Invalid email or password");
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
-        return buildError(HttpStatus.FORBIDDEN, "Access denied: insufficient permissions");
-    }
-
+    // Handles @Valid / @Validated failures on DTOs (e.g. @NotBlank, @NotNull, @Size)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<APIResponse<Map<String, String>>> handleValidationException(
+            MethodArgumentNotValidException e) {
+
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String field = ((FieldError) error).getField();
-            errors.put(field, error.getDefaultMessage());
-        });
-        return ResponseEntity.badRequest().body(Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", 400,
-                "error", "Validation Failed",
-                "details", errors
-        ));
+        e.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
+
+        return new ResponseEntity<>(
+                new APIResponse<>(HttpStatus.BAD_REQUEST.value(), "Validation Failed", errors),
+                HttpStatus.BAD_REQUEST
+        );
     }
 
-    private ResponseEntity<Map<String, Object>> buildError(HttpStatus status, String message) {
-        return ResponseEntity.status(status).body(Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", status.value(),
-                "error", status.getReasonPhrase(),
-                "message", message
-        ));
+    // Handles null values passed where not expected
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<APIResponse<String>> handleNullPointerException(NullPointerException e) {
+        return new ResponseEntity<>(
+                new APIResponse<>(HttpStatus.BAD_REQUEST.value(), "Null values are not allowed", e.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    // Handles invalid arguments (e.g. wrong types, illegal values)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<APIResponse<String>> handleIllegalArgumentException(IllegalArgumentException e) {
+        return new ResponseEntity<>(
+                new APIResponse<>(HttpStatus.BAD_REQUEST.value(), "Invalid argument provided", e.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    // Handles price/quantity String → number parse failures in OrderServiceImpl
+    @ExceptionHandler(NumberFormatException.class)
+    public ResponseEntity<APIResponse<String>> handleNumberFormatException(NumberFormatException e) {
+        return new ResponseEntity<>(
+                new APIResponse<>(HttpStatus.BAD_REQUEST.value(), "Invalid number format in data", e.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    // Handles Customer / Item / Order not found (thrown as RuntimeException in services)
+    @ExceptionHandler(DogNotFoundException.class)
+    public ResponseEntity<APIResponse<String>> handleCustomerNotFoundException(DogNotFoundException e) {
+        return new ResponseEntity<>(
+                new APIResponse<>(HttpStatus.NOT_FOUND.value(), "Customer Not Found", e.getMessage()),
+                HttpStatus.NOT_FOUND
+        );
+    }
+
+//    @ExceptionHandler(ItemNotFoundException.class)
+//    public ResponseEntity<APIResponse<String>> handleItemNotFoundException(ItemNotFoundException e) {
+//        return new ResponseEntity<>(
+//                new APIResponse<>(HttpStatus.NOT_FOUND.value(), "Item Not Found", e.getMessage()),
+//                HttpStatus.NOT_FOUND
+//        );
+//    }
+//
+//    @ExceptionHandler(OrderNotFoundException.class)
+//    public ResponseEntity<APIResponse<String>> handleOrderNotFoundException(OrderNotFoundException e) {
+//        return new ResponseEntity<>(
+//                new APIResponse<>(HttpStatus.NOT_FOUND.value(), "Order Not Found", e.getMessage()),
+//                HttpStatus.NOT_FOUND
+//        );
+//    }
+//
+//    // Handles not enough stock when placing an order
+//    @ExceptionHandler(InsufficientStockException.class)
+//    public ResponseEntity<APIResponse<String>> handleInsufficientStockException(InsufficientStockException e) {
+//        return new ResponseEntity<>(
+//                new APIResponse<>(HttpStatus.CONFLICT.value(), "Insufficient Stock", e.getMessage()),
+//                HttpStatus.CONFLICT
+//        );
+//    }
+
+    // Catch-all for any unexpected exception not handled above
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<APIResponse<String>> handleGenericException(Exception e) {
+        return new ResponseEntity<>(
+                new APIResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went wrong", e.getMessage()),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 }

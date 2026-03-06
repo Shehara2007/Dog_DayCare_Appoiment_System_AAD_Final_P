@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawCare — Doctor Appointments</title>
+    <link rel="stylesheet" href="../../css/shared.css">
+    <style>.shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}</style>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main">
+        <div class="topbar">
+            <div><div class="page-title">🩺 Doctor Appointments</div><div class="page-sub">Veterinary consultations & health visits</div></div>
+            <div class="topbar-right">
+                <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" id="searchInput" placeholder="Search dog or doctor…" oninput="filterTable()"></div>
+                <button class="btn btn-amber" onclick="openAdd()">+ Schedule Visit</button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="stats-grid fade-1" style="grid-template-columns:repeat(4,1fr)">
+                <div class="stat-card"><div class="stat-icon sky">🩺</div><div><div class="stat-value" id="sc_total">0</div><div class="stat-label">Total</div></div></div>
+                <div class="stat-card"><div class="stat-icon sage">✅</div><div><div class="stat-value" id="sc_conf">0</div><div class="stat-label">Confirmed</div></div></div>
+                <div class="stat-card"><div class="stat-icon amber">⏳</div><div><div class="stat-value" id="sc_pend">0</div><div class="stat-label">Pending</div></div></div>
+                <div class="stat-card"><div class="stat-icon bark">✔</div><div><div class="stat-value" id="sc_done">0</div><div class="stat-label">Completed</div></div></div>
+            </div>
+            <div class="filter-bar fade-2">
+                <button class="filter-chip active" onclick="setFilter(this,'ALL')">All</button>
+                <button class="filter-chip" onclick="setFilter(this,'PENDING')">⏳ Pending</button>
+                <button class="filter-chip" onclick="setFilter(this,'CONFIRMED')">✅ Confirmed</button>
+                <button class="filter-chip" onclick="setFilter(this,'CANCELLED')">❌ Cancelled</button>
+                <button class="filter-chip" onclick="setFilter(this,'COMPLETED')">✔ Completed</button>
+            </div>
+            <div class="table-wrap fade-3">
+                <table>
+                    <thead><tr><th>Dog</th><th>Doctor</th><th>Date & Time</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="docApptTbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="docApptModal" onclick="if(event.target===this)Modal.close('docApptModal')">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">🩺 Schedule Doctor Visit</div>
+            <button class="modal-close" onclick="Modal.close('docApptModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="docApptId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Dog</label>
+                    <select id="f_dogId" class="form-control">
+                        <option value="">Select dog…</option>
+                        <option value="1">🐶 Buddy</option><option value="2">🐩 Luna</option>
+                        <option value="3">🐕‍🦺 Max</option><option value="4">🦮 Coco</option>
+                        <option value="5">🐶 Bella</option><option value="6">🐾 Rocky</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Doctor</label>
+                    <select id="f_doctorId" class="form-control">
+                        <option value="1">Dr. Kamal Perera — General</option>
+                        <option value="2">Dr. Shalini Fernando — Dermatology</option>
+                        <option value="3">Dr. Ravi Kumara — Surgery</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input id="f_date" class="form-control" type="date">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Time</label>
+                    <select id="f_time" class="form-control">
+                        <option>09:00 AM</option><option>10:00 AM</option><option>11:00 AM</option>
+                        <option>02:00 PM</option><option>03:00 PM</option><option>04:00 PM</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select id="f_status" class="form-control">
+                        <option value="PENDING">⏳ Pending</option>
+                        <option value="CONFIRMED">✅ Confirmed</option>
+                        <option value="CANCELLED">❌ Cancelled</option>
+                        <option value="COMPLETED">✔ Completed</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Reason / Notes</label>
+                <textarea id="f_reason" class="form-control" placeholder="Reason for visit…"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="Modal.close('docApptModal')">Cancel</button>
+            <button class="btn btn-amber" onclick="saveDocAppt()">💾 Save</button>
+        </div>
+    </div>
+</div>
+
+<script src="../js/shared.js"></script><script src="../js/sidebar.js"></script>
+<script>
+    injectSidebar('doctor-appointments.html');
+
+    let docAppts=[
+        {doctorAppointmentId:1,dogId:1,dogName:'Buddy', doctorName:'Dr. Kamal Perera',  appointmentDateTime:'2026-03-05 09:00',reason:'Annual checkup',       status:'CONFIRMED'},
+        {doctorAppointmentId:2,dogId:2,dogName:'Luna',  doctorName:'Dr. Shalini Fernando',appointmentDateTime:'2026-03-05 10:30',reason:'Skin irritation',       status:'PENDING'},
+        {doctorAppointmentId:3,dogId:3,dogName:'Max',   doctorName:'Dr. Kamal Perera',  appointmentDateTime:'2026-03-05 11:00',reason:'Vaccination update',     status:'CONFIRMED'},
+        {doctorAppointmentId:4,dogId:4,dogName:'Coco',  doctorName:'Dr. Shalini Fernando',appointmentDateTime:'2026-03-05 12:00',reason:'Breathing issues',      status:'PENDING'},
+        {doctorAppointmentId:5,dogId:5,dogName:'Bella', doctorName:'Dr. Kamal Perera',  appointmentDateTime:'2026-03-03 01:30',reason:'Post-op follow up',      status:'COMPLETED'},
+    ];
+
+    let filterStatus='ALL';
+
+    function renderTable(data){
+        const tbody=document.getElementById('docApptTbody');
+        if(!data.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">No appointments found</td></tr>';return;}
+        tbody.innerHTML=data.map(a=>`<tr data-status="${a.status}">
+    <td><strong>${a.dogName}</strong></td>
+    <td>🩺 ${a.doctorName}</td>
+    <td>${a.appointmentDateTime}</td>
+    <td style="max-width:180px;font-size:12px;color:var(--text-muted)">${a.reason||'—'}</td>
+    <td>${statusBadge(a.status)}</td>
+    <td><div class="td-actions">
+      ${a.status==='PENDING'?`<button class="btn btn-sm btn-sage btn-icon" title="Confirm" onclick="setStatus(${a.doctorAppointmentId},'CONFIRMED')">✓</button>
+      <button class="btn btn-sm btn-rust btn-icon" title="Cancel" onclick="setStatus(${a.doctorAppointmentId},'CANCELLED')">✕</button>`:''}
+      ${a.status==='CONFIRMED'?`<button class="btn btn-sm btn-sky btn-icon" title="Mark Done" onclick="setStatus(${a.doctorAppointmentId},'COMPLETED')">✔</button>`:''}
+      <button class="btn btn-sm btn-sky btn-icon" title="Edit" onclick="openEdit(${a.doctorAppointmentId})">✏️</button>
+      <button class="btn btn-sm btn-rust btn-icon" title="Delete" onclick="deleteDocAppt(${a.doctorAppointmentId})">🗑</button>
+    </div></td>
+  </tr>`).join('');
+    }
+
+    function filterTable(){
+        const q=document.getElementById('searchInput').value.toLowerCase();
+        let data=docAppts;
+        if(filterStatus!=='ALL') data=data.filter(a=>a.status===filterStatus);
+        if(q) data=data.filter(a=>a.dogName.toLowerCase().includes(q)||a.doctorName.toLowerCase().includes(q));
+        renderTable(data);
+    }
+
+    function setFilter(el,f){filterStatus=f;document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');filterTable();}
+
+    function setStatus(id,status){
+        const idx=docAppts.findIndex(a=>a.doctorAppointmentId===id);if(idx>=0)docAppts[idx].status=status;
+        Toast.success('Status updated: '+status);filterTable();updateStats();
+    }
+
+    function openAdd(){
+        document.getElementById('docApptId').value='';
+        ['f_dogId','f_reason'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('f_date').valueAsDate=new Date();
+        document.getElementById('f_status').value='PENDING';
+        document.getElementById('modalTitle').textContent='🩺 Schedule Doctor Visit';
+        Modal.open('docApptModal');
+    }
+
+    function openEdit(id){
+        const a=docAppts.find(x=>x.doctorAppointmentId===id);if(!a)return;
+        document.getElementById('docApptId').value=a.doctorAppointmentId;
+        document.getElementById('f_dogId').value=a.dogId;
+        document.getElementById('f_status').value=a.status;
+        document.getElementById('f_reason').value=a.reason||'';
+        document.getElementById('modalTitle').textContent='✏️ Edit Appointment';
+        Modal.open('docApptModal');
+    }
+
+    async function saveDocAppt(){
+        const id=document.getElementById('docApptId').value;
+        const dogNames={1:'Buddy',2:'Luna',3:'Max',4:'Coco',5:'Bella',6:'Rocky'};
+        const doctorNames={1:'Dr. Kamal Perera',2:'Dr. Shalini Fernando',3:'Dr. Ravi Kumara'};
+        const body={dogId:parseInt(document.getElementById('f_dogId').value)||0,doctorId:parseInt(document.getElementById('f_doctorId').value)||1,appointmentDateTime:document.getElementById('f_date').value+' '+document.getElementById('f_time').value,reason:document.getElementById('f_reason').value,status:document.getElementById('f_status').value};
+        if(!body.dogId){Toast.warn('Select a dog');return;}
+        try{if(id){body.doctorAppointmentId=parseInt(id);await API.put('/doctor-appointments',body);}else{await API.post('/doctor-appointments',body);}}catch{}
+        if(id){const idx=docAppts.findIndex(a=>a.doctorAppointmentId===parseInt(id));if(idx>=0)docAppts[idx]={...docAppts[idx],...body,dogName:dogNames[body.dogId]||'Dog',doctorName:doctorNames[body.doctorId]||'Doctor'};Toast.success('Updated!');}
+        else{body.doctorAppointmentId=docAppts.length+1;body.dogName=dogNames[body.dogId]||'Dog '+body.dogId;body.doctorName=doctorNames[body.doctorId]||'Doctor';docAppts.push(body);Toast.success('Scheduled!');}
+        Modal.close('docApptModal');filterTable();updateStats();
+    }
+
+    async function deleteDocAppt(id){
+        Modal.confirm('Delete this appointment?',async()=>{try{await API.delete('/doctor-appointments/'+id);}catch{}docAppts=docAppts.filter(a=>a.doctorAppointmentId!==id);Toast.success('Deleted.');filterTable();updateStats();});
+    }
+
+    function updateStats(){
+        document.getElementById('sc_total').textContent=docAppts.length;
+        document.getElementById('sc_conf').textContent=docAppts.filter(a=>a.status==='CONFIRMED').length;
+        document.getElementById('sc_pend').textContent=docAppts.filter(a=>a.status==='PENDING').length;
+        document.getElementById('sc_done').textContent=docAppts.filter(a=>a.status==='COMPLETED').length;
+    }
+
+    filterTable();updateStats();
+</script>
+</body>
+</html>
