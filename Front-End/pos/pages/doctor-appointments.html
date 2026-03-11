@@ -37,7 +37,6 @@
             overflow-x: hidden;
         }
 
-        /* Noise texture */
         body::before {
             content: '';
             position: fixed;
@@ -132,7 +131,6 @@
             z-index: 1;
         }
 
-        /* Floating blobs */
         .blob {
             position: fixed;
             border-radius: 50%;
@@ -325,6 +323,16 @@
             border-radius: 0 4px 4px 0;
         }
 
+        /* inline edit/delete row */
+        .appt-inline-actions {
+            display: none;
+            gap: 8px;
+            padding: 10px 24px 14px;
+            border-bottom: 1px solid var(--warm);
+            background: var(--amber-pale);
+        }
+        .appt-item.selected + .appt-inline-actions { display: flex; }
+
         .appt-avatar {
             width: 52px; height: 52px;
             border-radius: 14px;
@@ -392,7 +400,6 @@
         /* ====== RIGHT PANEL ====== */
         .right-panel { display: flex; flex-direction: column; gap: 20px; }
 
-        /* Detail Card */
         .detail-card {
             background: #fff;
             border-radius: 20px;
@@ -424,10 +431,7 @@
             margin-bottom: 4px;
         }
 
-        .detail-breed {
-            color: rgba(255,255,255,0.6);
-            font-size: 13px;
-        }
+        .detail-breed { color: rgba(255,255,255,0.6); font-size: 13px; }
 
         .detail-badges {
             display: flex;
@@ -575,7 +579,6 @@
         .cal-day.today.has-appt::after { background: #fff; }
         .cal-day.selected-day { background: var(--bark); color: #fff; }
 
-        /* Doctor availability */
         .doctor-card {
             background: #fff;
             border-radius: 20px;
@@ -640,6 +643,8 @@
             box-shadow: 0 24px 60px rgba(61,43,31,0.3);
             animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
             overflow: hidden;
+            max-height: 92vh;
+            overflow-y: auto;
         }
 
         @keyframes modalIn {
@@ -653,6 +658,9 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 2;
         }
 
         .modal-title {
@@ -675,6 +683,20 @@
         }
 
         .modal-close:hover { background: rgba(255,255,255,0.2); }
+
+        /* Edit mode banner inside modal */
+        .modal-edit-banner {
+            display: none;
+            background: rgba(212,130,10,0.1);
+            border-bottom: 1.5px solid rgba(212,130,10,0.25);
+            padding: 10px 28px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #8B5E00;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-edit-banner.visible { display: flex; }
 
         .modal-body { padding: 24px 28px; }
 
@@ -708,6 +730,7 @@
             color: var(--bark);
             outline: none;
             transition: all 0.2s;
+            -webkit-appearance: none;
         }
 
         .form-control:focus {
@@ -716,7 +739,33 @@
             box-shadow: 0 0 0 3px rgba(212,130,10,0.12);
         }
 
-        .form-control select { appearance: none; }
+        /* Doctor select with availability preview */
+        .doctor-select-wrap { position: relative; }
+
+        .doctor-avail-preview {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 9px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .doctor-avail-preview.show { display: flex; }
+        .doctor-avail-preview.avail-available { background: rgba(122,158,126,0.12); color: #3A6B3E; border: 1.5px solid rgba(122,158,126,0.3); }
+        .doctor-avail-preview.avail-limited { background: rgba(212,130,10,0.1); color: #8B5E00; border: 1.5px solid rgba(212,130,10,0.3); }
+        .doctor-avail-preview.avail-full { background: rgba(192,71,42,0.08); color: var(--rust); border: 1.5px solid rgba(192,71,42,0.25); }
+
+        .avail-dot {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .dot-green { background: var(--sage); box-shadow: 0 0 0 3px rgba(122,158,126,0.2); }
+        .dot-amber { background: var(--amber); box-shadow: 0 0 0 3px rgba(212,130,10,0.2); }
+        .dot-red { background: var(--rust); box-shadow: 0 0 0 3px rgba(192,71,42,0.2); }
 
         .priority-pills {
             display: flex;
@@ -746,6 +795,7 @@
             display: flex;
             gap: 12px;
             padding: 0 28px 28px;
+            flex-wrap: wrap;
         }
 
         .btn-cancel {
@@ -760,6 +810,7 @@
             color: var(--text-muted);
             cursor: pointer;
             transition: all 0.2s;
+            min-width: 90px;
         }
 
         .btn-cancel:hover { background: var(--warm); color: var(--bark); }
@@ -777,9 +828,40 @@
             cursor: pointer;
             box-shadow: 0 4px 16px rgba(212,130,10,0.35);
             transition: all 0.2s;
+            min-width: 140px;
         }
 
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,130,10,0.45); }
+
+        .btn-delete-modal {
+            padding: 12px 18px;
+            border-radius: 12px;
+            border: 1.5px solid rgba(192,71,42,0.25);
+            background: rgba(192,71,42,0.07);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--rust);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-delete-modal:hover { background: rgba(192,71,42,0.15); }
+
+        /* small inline action btns */
+        .btn-inline {
+            padding: 7px 14px;
+            border-radius: 9px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-inline-edit { background: var(--amber); color: #fff; }
+        .btn-inline-edit:hover { background: #b36e08; }
+        .btn-inline-delete { background: rgba(192,71,42,0.1); color: var(--rust); border: 1.5px solid rgba(192,71,42,0.2); }
+        .btn-inline-delete:hover { background: rgba(192,71,42,0.18); }
 
         /* ====== ANIMATIONS ====== */
         @keyframes fadeUp {
@@ -791,14 +873,9 @@
         .fade-2 { animation: fadeUp 0.5s 0.15s ease both; }
         .fade-3 { animation: fadeUp 0.5s 0.25s ease both; }
 
-        /* Progress bar animation */
-        @keyframes fillBar {
-            from { width: 0; }
-        }
-
+        @keyframes fillBar { from { width: 0; } }
         .progress-bar { animation: fillBar 1s 0.5s ease both; }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--warm-dark); border-radius: 3px; }
@@ -814,7 +891,7 @@
     </div>
 
     <div class="sidebar-section">Main Menu</div>
-    <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
+    <a href="admin-dashboard.html" class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
     <a href="appointments.html" class="nav-item"><span class="nav-icon">📅</span> Appointments</a>
     <a href="dog-profile.html" class="nav-item"><span class="nav-icon">🐶</span> Dog Profiles</a>
     <a href="health-report.html" class="nav-item"><span class="nav-icon">📋</span> Health Reports</a>
@@ -839,20 +916,18 @@
     </div>
 </aside>
 
-<!-- BLOBS -->
 <div class="blob blob-1"></div>
 <div class="blob blob-2"></div>
 
 <!-- ====== MAIN ====== -->
 <main class="main">
 
-    <!-- Header -->
     <div class="page-header fade-1">
         <div>
             <h1 class="page-title">🩺 Doctor Appointments</h1>
             <p class="page-subtitle">Manage veterinary consultations and health checkups</p>
         </div>
-        <button class="btn-primary" onclick="openModal()">
+        <button class="btn-primary" onclick="openNewModal()">
             <span>＋</span> Schedule Appointment
         </button>
     </div>
@@ -862,28 +937,28 @@
         <div class="stat-card">
             <div class="stat-icon amber">📅</div>
             <div>
-                <div class="stat-value" id="totalCount">12</div>
+                <div class="stat-value" id="totalCount">0</div>
                 <div class="stat-label">Total Today</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon sage">✅</div>
             <div>
-                <div class="stat-value" id="confirmedCount">7</div>
+                <div class="stat-value" id="confirmedCount">0</div>
                 <div class="stat-label">Confirmed</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon sky">⏳</div>
             <div>
-                <div class="stat-value" id="pendingCount">3</div>
+                <div class="stat-value" id="pendingCount">0</div>
                 <div class="stat-label">Pending</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon rust">🚨</div>
             <div>
-                <div class="stat-value" id="urgentCount">2</div>
+                <div class="stat-value" id="urgentCount">0</div>
                 <div class="stat-label">Urgent Cases</div>
             </div>
         </div>
@@ -897,10 +972,9 @@
             <div class="card fade-2">
                 <div class="card-header" style="padding-bottom:0;">
                     <div class="card-title">Today's Appointments</div>
-                    <div style="font-size:13px;color:var(--text-muted);">March 5, 2026</div>
+                    <div style="font-size:13px;color:var(--text-muted);">March 11, 2026</div>
                 </div>
 
-                <!-- Filter Tabs -->
                 <div class="filter-tabs">
                     <button class="filter-tab active" onclick="filterAppts(this,'all')">All</button>
                     <button class="filter-tab" onclick="filterAppts(this,'confirmed')">Confirmed</button>
@@ -909,121 +983,8 @@
                     <button class="filter-tab" onclick="filterAppts(this,'completed')">Completed</button>
                 </div>
 
-                <!-- Appointment List -->
                 <div class="appt-list" id="apptList">
-
-                    <div class="appt-item selected" data-status="confirmed" onclick="selectAppt(this,0)">
-                        <div class="appt-avatar status-confirmed" style="background:#FEF3E0;">🐕</div>
-                        <div class="appt-info">
-                            <div class="dog-name">Buddy — Golden Retriever</div>
-                            <div class="appt-meta">
-                                <span>👤 James Silva</span>
-                                <span>🩺 Dr. Perera</span>
-                                <span>💊 Routine Checkup</span>
-                            </div>
-                        </div>
-                        <div class="appt-right">
-                            <div class="appt-time">09:00 AM</div>
-                            <span class="status-badge badge-confirmed">● Confirmed</span>
-                        </div>
-                    </div>
-
-                    <div class="appt-item" data-status="pending" onclick="selectAppt(this,1)">
-                        <div class="appt-avatar status-pending" style="background:#FEF3E0;">🐩</div>
-                        <div class="appt-info">
-                            <div class="dog-name">Luna — Poodle</div>
-                            <div class="appt-meta">
-                                <span>👤 Amara Peiris</span>
-                                <span>🩺 Dr. Fernando</span>
-                                <span>🚨 Skin Irritation</span>
-                            </div>
-                        </div>
-                        <div class="appt-right">
-                            <div class="appt-time">10:30 AM</div>
-                            <span class="status-badge badge-pending">● Pending</span>
-                        </div>
-                    </div>
-
-                    <div class="appt-item" data-status="confirmed" onclick="selectAppt(this,2)">
-                        <div class="appt-avatar status-confirmed" style="background:#EEF5FF;">🐕‍🦺</div>
-                        <div class="appt-info">
-                            <div class="dog-name">Max — German Shepherd</div>
-                            <div class="appt-meta">
-                                <span>👤 Rahul de Silva</span>
-                                <span>🩺 Dr. Perera</span>
-                                <span>💉 Vaccination Update</span>
-                            </div>
-                        </div>
-                        <div class="appt-right">
-                            <div class="appt-time">11:00 AM</div>
-                            <span class="status-badge badge-confirmed">● Confirmed</span>
-                        </div>
-                    </div>
-
-                    <div class="appt-item" data-status="pending" onclick="selectAppt(this,3)">
-                        <div class="appt-avatar status-pending" style="background:#FFF5EE;">🐾</div>
-                        <div class="appt-info">
-                            <div class="dog-name">Coco — French Bulldog</div>
-                            <div class="appt-meta">
-                                <span>👤 Nisha Gunasekara</span>
-                                <span>🩺 Dr. Fernando</span>
-                                <span>🚨 Breathing Issues</span>
-                            </div>
-                        </div>
-                        <div class="appt-right">
-                            <div class="appt-time">12:00 PM</div>
-                            <span class="status-badge badge-pending">● Pending</span>
-                        </div>
-                    </div>
-
-                    <div class="appt-item" data-status="completed" onclick="selectAppt(this,4)">
-                        <div class="appt-avatar status-confirmed" style="background:#F0FFF4;">🦮</div>
-                        <div class="appt-info">
-                            <div class="dog-name">Bella — Labrador</div>
-                            <div class="appt-meta">
-                                <span>👤 Chen Wei</span>
-                                <span>🩺 Dr. Perera</span>
-                                <span>💊 Post-op Follow Up</span>
-                            </div>
-                        </div>
-                        <div class="appt-right">
-                            <div class="appt-time">01:30 PM</div>
-                            <span class="status-badge badge-completed">● Completed</span>
-                        </div>
-                    </div>
-
-                    <div class="appt-item" data-status="cancelled" onclick="selectAppt(this,5)">
-                        <div class="appt-avatar status-cancelled" style="background:#FFF0EE;">🐕</div>
-                        <div class="appt-info">
-                            <div class="dog-name">Rocky — Rottweiler</div>
-                            <div class="appt-meta">
-                                <span>👤 Saman Wickrama</span>
-                                <span>🩺 Dr. Kumara</span>
-                                <span>⚠️ HIGH RISK</span>
-                            </div>
-                        </div>
-                        <div class="appt-right">
-                            <div class="appt-time">02:30 PM</div>
-                            <span class="status-badge badge-cancelled">● Cancelled</span>
-                        </div>
-                    </div>
-
-                    <div class="appt-item" data-status="confirmed" onclick="selectAppt(this,6)">
-                        <div class="appt-avatar status-confirmed" style="background:#FFF8E0;">🐶</div>
-                        <div class="appt-info">
-                            <div class="dog-name">Milo — Beagle</div>
-                            <div class="appt-meta">
-                                <span>👤 Priya Jayawardena</span>
-                                <span>🩺 Dr. Kumara</span>
-                                <span>💊 Ear Infection</span>
-                            </div>
-                        </div>
-                        <div class="appt-right">
-                            <div class="appt-time">03:00 PM</div>
-                            <span class="status-badge badge-confirmed">● Confirmed</span>
-                        </div>
-                    </div>
-
+                    <!-- Rendered by JS -->
                 </div>
             </div>
         </div>
@@ -1090,32 +1051,26 @@
                     <div class="cal-day-name">T</div><div class="cal-day-name">W</div>
                     <div class="cal-day-name">T</div><div class="cal-day-name">F</div>
                     <div class="cal-day-name">S</div>
-
                     <div class="cal-day other-month">22</div><div class="cal-day other-month">23</div>
                     <div class="cal-day other-month">24</div><div class="cal-day other-month">25</div>
                     <div class="cal-day other-month">26</div><div class="cal-day other-month">27</div>
                     <div class="cal-day other-month">28</div>
-
                     <div class="cal-day">1</div><div class="cal-day has-appt">2</div>
                     <div class="cal-day has-appt">3</div><div class="cal-day has-appt">4</div>
-                    <div class="cal-day today has-appt">5</div><div class="cal-day">6</div>
+                    <div class="cal-day has-appt">5</div><div class="cal-day">6</div>
                     <div class="cal-day">7</div>
-
                     <div class="cal-day">8</div><div class="cal-day has-appt">9</div>
-                    <div class="cal-day">10</div><div class="cal-day has-appt">11</div>
+                    <div class="cal-day">10</div><div class="cal-day today has-appt">11</div>
                     <div class="cal-day">12</div><div class="cal-day">13</div>
                     <div class="cal-day">14</div>
-
                     <div class="cal-day">15</div><div class="cal-day">16</div>
                     <div class="cal-day has-appt">17</div><div class="cal-day">18</div>
                     <div class="cal-day">19</div><div class="cal-day has-appt">20</div>
                     <div class="cal-day">21</div>
-
                     <div class="cal-day">22</div><div class="cal-day">23</div>
                     <div class="cal-day">24</div><div class="cal-day has-appt">25</div>
                     <div class="cal-day">26</div><div class="cal-day">27</div>
                     <div class="cal-day">28</div>
-
                     <div class="cal-day">29</div><div class="cal-day">30</div>
                     <div class="cal-day">31</div>
                     <div class="cal-day other-month">1</div><div class="cal-day other-month">2</div>
@@ -1126,7 +1081,6 @@
             <!-- Doctor Availability -->
             <div class="doctor-card fade-3">
                 <div class="card-title" style="margin-bottom:12px;">Doctors On Duty</div>
-
                 <div class="doctor-item">
                     <div class="doctor-avatar">👨‍⚕️</div>
                     <div>
@@ -1135,7 +1089,6 @@
                     </div>
                     <div class="doctor-avail avail-yes"></div>
                 </div>
-
                 <div class="doctor-item">
                     <div class="doctor-avatar">👩‍⚕️</div>
                     <div>
@@ -1144,7 +1097,6 @@
                     </div>
                     <div class="doctor-avail avail-yes"></div>
                 </div>
-
                 <div class="doctor-item">
                     <div class="doctor-avatar">👨‍⚕️</div>
                     <div>
@@ -1153,7 +1105,6 @@
                     </div>
                     <div class="doctor-avail avail-no"></div>
                 </div>
-
             </div>
 
         </div>
@@ -1164,38 +1115,54 @@
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">🩺 Schedule Doctor Appointment</div>
+            <div class="modal-title" id="modalTitle">🩺 Schedule Doctor Appointment</div>
             <button class="modal-close" onclick="closeModal()">✕</button>
         </div>
+
+        <!-- Edit banner -->
+        <div class="modal-edit-banner" id="modalEditBanner">
+            ✏️ Editing appointment — update fields and click <strong>Update</strong>
+        </div>
+
         <div class="modal-body">
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Select Dog</label>
-                    <select class="form-control">
-                        <option>🐕 Buddy — Golden Retriever</option>
-                        <option>🐩 Luna — Poodle</option>
-                        <option>🐕‍🦺 Max — German Shepherd</option>
-                        <option>🐾 Coco — French Bulldog</option>
-                        <option>🦮 Bella — Labrador</option>
+                    <select class="form-control" id="mDog">
+                        <option value="buddy">🐕 Buddy — Golden Retriever</option>
+                        <option value="luna">🐩 Luna — Poodle</option>
+                        <option value="max">🐕‍🦺 Max — German Shepherd</option>
+                        <option value="coco">🐾 Coco — French Bulldog</option>
+                        <option value="bella">🦮 Bella — Labrador</option>
+                        <option value="rocky">🐕 Rocky — Rottweiler</option>
+                        <option value="milo">🐶 Milo — Beagle</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Select Doctor</label>
-                    <select class="form-control">
-                        <option>Dr. Kamal Perera</option>
-                        <option>Dr. Shalini Fernando</option>
-                        <option>Dr. Ravi Kumara</option>
-                    </select>
+                    <div class="doctor-select-wrap">
+                        <select class="form-control" id="mDoctor" onchange="showDoctorAvail(this)">
+                            <option value="">— choose doctor —</option>
+                            <option value="perera">Dr. Kamal Perera</option>
+                            <option value="fernando">Dr. Shalini Fernando</option>
+                            <option value="kumara">Dr. Ravi Kumara</option>
+                        </select>
+                        <!-- Availability preview shown after selection -->
+                        <div class="doctor-avail-preview" id="doctorAvailPreview">
+                            <span class="avail-dot" id="availDot"></span>
+                            <span id="availText"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Date</label>
-                    <input type="date" class="form-control" value="2026-03-05">
+                    <input type="date" class="form-control" id="mDate" value="2026-03-11">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Time Slot</label>
-                    <select class="form-control">
+                    <select class="form-control" id="mTime">
                         <option>09:00 AM</option>
                         <option>09:30 AM</option>
                         <option>10:00 AM</option>
@@ -1207,9 +1174,19 @@
                     </select>
                 </div>
             </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Owner Name</label>
+                    <input type="text" class="form-control" id="mOwner" placeholder="e.g. James Silva">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Number</label>
+                    <input type="text" class="form-control" id="mPhone" placeholder="+94 77 000 0000">
+                </div>
+            </div>
             <div class="form-group">
                 <label class="form-label">Visit Type / Priority</label>
-                <div class="priority-pills">
+                <div class="priority-pills" id="priorityPills">
                     <button class="priority-pill routine active" onclick="setPriority(this,'routine')">🩺 Routine</button>
                     <button class="priority-pill urgent" onclick="setPriority(this,'urgent')">⚠️ Urgent</button>
                     <button class="priority-pill emergency" onclick="setPriority(this,'emergency')">🚨 Emergency</button>
@@ -1217,113 +1194,379 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Reason / Notes</label>
-                <textarea class="form-control" rows="3" placeholder="Describe symptoms or reason for visit..."></textarea>
+                <textarea class="form-control" id="mNotes" rows="3" placeholder="Describe symptoms or reason for visit..."></textarea>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-            <button class="btn-submit" onclick="submitAppt()">✓ Confirm Appointment</button>
+        <div class="modal-footer" id="modalFooter">
+            <!-- Rendered by JS -->
         </div>
     </div>
 </div>
 
 <script>
-    // Appointment data
-    const apptData = [
-        { name:'Buddy', breed:'Golden Retriever · Male · 3 yrs', type:'Routine Checkup', risk:'LOW RISK', time:'09:00 AM', owner:'James Silva', doctor:'Dr. Perera', phone:'+94 77 123 4567', status:'confirmed', notes:'Annual checkup, bring vaccination records' },
-        { name:'Luna', breed:'Poodle · Female · 2 yrs', type:'Skin Irritation', risk:'MEDIUM RISK', time:'10:30 AM', owner:'Amara Peiris', doctor:'Dr. Fernando', phone:'+94 71 234 5678', status:'pending', notes:'Persistent scratching, possible allergy' },
-        { name:'Max', breed:'German Shepherd · Male · 5 yrs', type:'Vaccination Update', risk:'LOW RISK', time:'11:00 AM', owner:'Rahul de Silva', doctor:'Dr. Perera', phone:'+94 77 345 6789', status:'confirmed', notes:'Rabies booster overdue' },
-        { name:'Coco', breed:'French Bulldog · Female · 4 yrs', type:'Breathing Issues', risk:'HIGH RISK', time:'12:00 PM', owner:'Nisha Gunasekara', doctor:'Dr. Fernando', phone:'+94 70 456 7890', status:'pending', notes:'Labored breathing after exercise' },
-        { name:'Bella', breed:'Labrador · Female · 6 yrs', type:'Post-op Follow Up', risk:'LOW RISK', time:'01:30 PM', owner:'Chen Wei', doctor:'Dr. Perera', phone:'+94 76 567 8901', status:'completed', notes:'Week 2 check after knee surgery' },
-        { name:'Rocky', breed:'Rottweiler · Male · 3 yrs', type:'HIGH RISK Dog', risk:'HIGH RISK', time:'02:30 PM', owner:'Saman Wickrama', doctor:'Dr. Kumara', phone:'+94 78 678 9012', status:'cancelled', notes:'Owner cancelled — rescheduling' },
-        { name:'Milo', breed:'Beagle · Male · 2 yrs', type:'Ear Infection', risk:'LOW RISK', time:'03:00 PM', owner:'Priya Jayawardena', doctor:'Dr. Kumara', phone:'+94 72 789 0123', status:'confirmed', notes:'Shaking head frequently, possible ear mites' },
+    // ── DOCTOR META ───────────────────────────────────────
+    const doctorMeta = {
+        perera:   { label:'Dr. Perera',   full:'Dr. Kamal Perera',   avail:'available', slots:'4 slots left',    spec:'General Veterinarian' },
+        fernando: { label:'Dr. Fernando', full:'Dr. Shalini Fernando',avail:'limited',   slots:'1 slot left',     spec:'Dermatology Specialist' },
+        kumara:   { label:'Dr. Kumara',   full:'Dr. Ravi Kumara',    avail:'full',       slots:'Fully Booked',    spec:'Surgery & Orthopedics' },
+    };
+
+    const dogMeta = {
+        buddy:   { label:'Buddy',   breed:'Golden Retriever · Male · 3 yrs', emoji:'🐕',   bg:'#FEF3E0' },
+        luna:    { label:'Luna',    breed:'Poodle · Female · 2 yrs',          emoji:'🐩',   bg:'#FEF3E0' },
+        max:     { label:'Max',     breed:'German Shepherd · Male · 5 yrs',   emoji:'🐕‍🦺', bg:'#EEF5FF' },
+        coco:    { label:'Coco',    breed:'French Bulldog · Female · 4 yrs',  emoji:'🐾',   bg:'#FFF5EE' },
+        bella:   { label:'Bella',   breed:'Labrador · Female · 6 yrs',        emoji:'🦮',   bg:'#F0FFF4' },
+        rocky:   { label:'Rocky',   breed:'Rottweiler · Male · 3 yrs',        emoji:'🐕',   bg:'#FFF0EE' },
+        milo:    { label:'Milo',    breed:'Beagle · Male · 2 yrs',            emoji:'🐶',   bg:'#FFF8E0' },
+    };
+
+    // ── DATA ──────────────────────────────────────────────
+    let appointments = [
+        { id:1, dog:'buddy', dogLabel:'Buddy', dogEmoji:'🐕', dogBg:'#FEF3E0', breed:'Golden Retriever · Male · 3 yrs', type:'Routine Checkup', risk:'LOW RISK', time:'09:00 AM', owner:'James Silva', doctorKey:'perera', doctor:'Dr. Perera', phone:'+94 77 123 4567', status:'confirmed', priority:'routine', notes:'Annual checkup, bring vaccination records' },
+        { id:2, dog:'luna',  dogLabel:'Luna',  dogEmoji:'🐩', dogBg:'#FEF3E0', breed:'Poodle · Female · 2 yrs',         type:'Skin Irritation',  risk:'MEDIUM RISK', time:'10:30 AM', owner:'Amara Peiris', doctorKey:'fernando', doctor:'Dr. Fernando', phone:'+94 71 234 5678', status:'pending', priority:'urgent', notes:'Persistent scratching, possible allergy' },
+        { id:3, dog:'max',   dogLabel:'Max',   dogEmoji:'🐕‍🦺', dogBg:'#EEF5FF', breed:'German Shepherd · Male · 5 yrs', type:'Vaccination Update', risk:'LOW RISK', time:'11:00 AM', owner:'Rahul de Silva', doctorKey:'perera', doctor:'Dr. Perera', phone:'+94 77 345 6789', status:'confirmed', priority:'routine', notes:'Rabies booster overdue' },
+        { id:4, dog:'coco',  dogLabel:'Coco',  dogEmoji:'🐾', dogBg:'#FFF5EE', breed:'French Bulldog · Female · 4 yrs', type:'Breathing Issues',  risk:'HIGH RISK', time:'12:00 PM', owner:'Nisha Gunasekara', doctorKey:'fernando', doctor:'Dr. Fernando', phone:'+94 70 456 7890', status:'pending', priority:'emergency', notes:'Labored breathing after exercise' },
+        { id:5, dog:'bella', dogLabel:'Bella', dogEmoji:'🦮', dogBg:'#F0FFF4', breed:'Labrador · Female · 6 yrs',        type:'Post-op Follow Up', risk:'LOW RISK', time:'01:30 PM', owner:'Chen Wei', doctorKey:'perera', doctor:'Dr. Perera', phone:'+94 76 567 8901', status:'completed', priority:'routine', notes:'Week 2 check after knee surgery' },
+        { id:6, dog:'rocky', dogLabel:'Rocky', dogEmoji:'🐕', dogBg:'#FFF0EE', breed:'Rottweiler · Male · 3 yrs',        type:'HIGH RISK Dog',     risk:'HIGH RISK', time:'02:30 PM', owner:'Saman Wickrama', doctorKey:'kumara', doctor:'Dr. Kumara', phone:'+94 78 678 9012', status:'cancelled', priority:'urgent', notes:'Owner cancelled — rescheduling' },
+        { id:7, dog:'milo',  dogLabel:'Milo',  dogEmoji:'🐶', dogBg:'#FFF8E0', breed:'Beagle · Male · 2 yrs',           type:'Ear Infection',     risk:'LOW RISK', time:'03:00 PM', owner:'Priya Jayawardena', doctorKey:'kumara', doctor:'Dr. Kumara', phone:'+94 72 789 0123', status:'confirmed', priority:'routine', notes:'Shaking head frequently, possible ear mites' },
     ];
+    let nextId = 8;
+    let selectedId = null;
+    let editId = null;
+    let activePriority = 'routine';
+    let currentFilter = 'all';
 
     const statusClasses = { confirmed:'badge-confirmed', pending:'badge-pending', cancelled:'badge-cancelled', completed:'badge-completed' };
-    const statusLabels = { confirmed:'● Confirmed', pending:'● Pending', cancelled:'● Cancelled', completed:'● Completed' };
+    const statusLabels  = { confirmed:'● Confirmed', pending:'● Pending', cancelled:'● Cancelled', completed:'● Completed' };
+    const statusAvatar  = { confirmed:'status-confirmed', pending:'status-pending', cancelled:'status-cancelled', completed:'status-confirmed' };
 
-    function selectAppt(el, idx) {
-        document.querySelectorAll('.appt-item').forEach(i => i.classList.remove('selected'));
-        el.classList.add('selected');
-        const d = apptData[idx];
-        document.getElementById('detailName').textContent = d.name;
-        document.getElementById('detailBreed').textContent = d.breed;
-        document.getElementById('detailType').textContent = d.type;
-        document.getElementById('detailRisk').textContent = d.risk;
-        document.getElementById('detailTime').textContent = d.time;
-        document.getElementById('detailOwner').textContent = d.owner;
+    // ── RENDER LIST ───────────────────────────────────────
+    function renderList() {
+        const container = document.getElementById('apptList');
+        container.innerHTML = '';
+
+        appointments.forEach(a => {
+            const visible = (currentFilter === 'all' || a.status === currentFilter);
+
+            // appointment row
+            const row = document.createElement('div');
+            row.className = `appt-item${a.id===selectedId?' selected':''}`;
+            row.dataset.status = a.status;
+            row.dataset.id = a.id;
+            row.style.display = visible ? '' : 'none';
+            row.innerHTML = `
+                <div class="appt-avatar ${statusAvatar[a.status]}" style="background:${a.dogBg};">${a.dogEmoji}</div>
+                <div class="appt-info">
+                    <div class="dog-name">${a.dogLabel} — ${a.breed.split('·')[0].trim()}</div>
+                    <div class="appt-meta">
+                        <span>👤 ${a.owner}</span>
+                        <span>🩺 ${a.doctor}</span>
+                        <span>${priorityIcon(a.priority)} ${a.type}</span>
+                    </div>
+                </div>
+                <div class="appt-right">
+                    <div class="appt-time">${a.time}</div>
+                    <span class="status-badge ${statusClasses[a.status]}">${statusLabels[a.status]}</span>
+                </div>
+            `;
+            row.addEventListener('click', () => selectAppt(a.id));
+            container.appendChild(row);
+
+            // inline actions row (only shown when selected via CSS sibling rule)
+            const actions = document.createElement('div');
+            actions.className = 'appt-inline-actions';
+            actions.dataset.id = a.id;
+            actions.style.display = visible ? '' : 'none';
+            actions.innerHTML = `
+                <button class="btn-inline btn-inline-edit" onclick="openEditModal(${a.id},event)">✏️ Edit</button>
+                <button class="btn-inline btn-inline-delete" onclick="deleteAppt(${a.id},event)">🗑️ Delete</button>
+            `;
+            container.appendChild(actions);
+        });
+
+        updateStats();
+    }
+
+    function priorityIcon(p) {
+        return {routine:'💊', urgent:'⚠️', emergency:'🚨'}[p] || '💊';
+    }
+
+    // ── SELECT ────────────────────────────────────────────
+    function selectAppt(id) {
+        selectedId = selectedId === id ? null : id;
+        renderList();
+        if (selectedId) updateDetailPanel(appointments.find(a=>a.id===id));
+    }
+
+    function updateDetailPanel(d) {
+        document.getElementById('detailName').textContent   = d.dogLabel;
+        document.getElementById('detailBreed').textContent  = d.breed;
+        document.getElementById('detailType').textContent   = d.type;
+        document.getElementById('detailRisk').textContent   = d.risk;
+        document.getElementById('detailTime').textContent   = d.time;
+        document.getElementById('detailOwner').textContent  = d.owner;
         document.getElementById('detailDoctor').textContent = d.doctor;
-        document.getElementById('detailPhone').textContent = d.phone;
-        document.getElementById('detailNotes').textContent = d.notes;
+        document.getElementById('detailPhone').textContent  = d.phone;
+        document.getElementById('detailNotes').textContent  = d.notes;
         const sb = document.getElementById('detailStatus');
         sb.className = 'status-badge ' + statusClasses[d.status];
         sb.textContent = statusLabels[d.status];
 
-        const actions = document.getElementById('detailActions');
+        const da = document.getElementById('detailActions');
         if (d.status === 'pending') {
-            actions.innerHTML = '<button class="btn-action btn-approve" onclick="approveAppt()">✓ Approve</button><button class="btn-action btn-reject" onclick="rejectAppt()">✕ Reject</button>';
+            da.innerHTML = `<button class="btn-action btn-approve" onclick="approveSelected()">✓ Approve</button><button class="btn-action btn-reject" onclick="rejectSelected()">✕ Reject</button>`;
         } else if (d.status === 'confirmed') {
-            actions.innerHTML = '<button class="btn-action btn-approve" onclick="markDone()">✓ Mark Done</button><button class="btn-action btn-reject" onclick="cancelAppt()">✕ Cancel</button>';
+            da.innerHTML = `<button class="btn-action btn-approve" onclick="markDoneSelected()">✓ Mark Done</button><button class="btn-action btn-reject" onclick="cancelSelected()">✕ Cancel</button>`;
         } else {
-            actions.innerHTML = '<button class="btn-action" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--warm-dark);background:var(--warm);font-family:DM Sans,sans-serif;font-size:13px;font-weight:600;cursor:pointer;" onclick="reschedule()">📅 Reschedule</button>';
+            da.innerHTML = `<button class="btn-action" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--warm-dark);background:var(--warm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;" onclick="openEditModal(${d.id},null)">📅 Reschedule</button>`;
         }
     }
 
+    // ── FILTER ────────────────────────────────────────────
     function filterAppts(el, status) {
+        currentFilter = status;
         document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
-        document.querySelectorAll('.appt-item').forEach(item => {
-            const s = item.getAttribute('data-status');
-            item.style.display = (status === 'all' || s === status) ? '' : 'none';
-        });
+        renderList();
     }
 
-    function approveAppt() { showToast('✅ Appointment approved!', 'sage'); }
-    function rejectAppt() { showToast('❌ Appointment rejected.', 'rust'); }
-    function markDone() { showToast('✅ Marked as completed!', 'sage'); }
-    function cancelAppt() { showToast('❌ Appointment cancelled.', 'rust'); }
-    function reschedule() { openModal(); }
+    // ── STATS ─────────────────────────────────────────────
+    function updateStats() {
+        document.getElementById('totalCount').textContent     = appointments.length;
+        document.getElementById('confirmedCount').textContent = appointments.filter(a=>a.status==='confirmed').length;
+        document.getElementById('pendingCount').textContent   = appointments.filter(a=>a.status==='pending').length;
+        document.getElementById('urgentCount').textContent    = appointments.filter(a=>a.priority==='emergency'||a.priority==='urgent').length;
+    }
 
-    function openModal() { document.getElementById('modalOverlay').classList.add('open'); }
-    function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
-    function closeModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+    // ── DETAIL PANEL QUICK ACTIONS ────────────────────────
+    function approveSelected() {
+        if (!selectedId) return;
+        appointments.find(a=>a.id===selectedId).status = 'confirmed';
+        renderList();
+        updateDetailPanel(appointments.find(a=>a.id===selectedId));
+        showToast('✅ Appointment approved!','sage');
+    }
+    function rejectSelected() {
+        if (!selectedId) return;
+        appointments.find(a=>a.id===selectedId).status = 'cancelled';
+        renderList();
+        updateDetailPanel(appointments.find(a=>a.id===selectedId));
+        showToast('❌ Appointment rejected.','rust');
+    }
+    function markDoneSelected() {
+        if (!selectedId) return;
+        appointments.find(a=>a.id===selectedId).status = 'completed';
+        renderList();
+        updateDetailPanel(appointments.find(a=>a.id===selectedId));
+        showToast('✅ Marked as completed!','sage');
+    }
+    function cancelSelected() {
+        if (!selectedId) return;
+        appointments.find(a=>a.id===selectedId).status = 'cancelled';
+        renderList();
+        updateDetailPanel(appointments.find(a=>a.id===selectedId));
+        showToast('❌ Appointment cancelled.','rust');
+    }
 
+    // ── DELETE ────────────────────────────────────────────
+    function deleteAppt(id, event) {
+        if(event) event.stopPropagation();
+        if(!confirm('Delete this appointment? This cannot be undone.')) return;
+        appointments = appointments.filter(a=>a.id!==id);
+        if(selectedId===id) selectedId=null;
+        renderList();
+        showToast('🗑️ Appointment deleted.','rust');
+    }
+
+    // ── MODAL OPEN/CLOSE ──────────────────────────────────
+    function openNewModal() {
+        editId = null;
+        resetModalForm();
+        document.getElementById('modalTitle').textContent = '🩺 Schedule Appointment';
+        document.getElementById('modalEditBanner').classList.remove('visible');
+        setModalFooter('new');
+        document.getElementById('modalOverlay').classList.add('open');
+    }
+
+    function openEditModal(id, event) {
+        if(event) event.stopPropagation();
+        const a = appointments.find(x=>x.id===id);
+        if(!a) return;
+        editId = id;
+
+        // populate
+        document.getElementById('mDog').value    = a.dog;
+        document.getElementById('mDoctor').value = a.doctorKey;
+        showDoctorAvail(document.getElementById('mDoctor'));
+        document.getElementById('mDate').value   = '2026-03-11';
+        document.getElementById('mOwner').value  = a.owner;
+        document.getElementById('mPhone').value  = a.phone;
+        document.getElementById('mNotes').value  = a.notes;
+
+        // time
+        const timeEl = document.getElementById('mTime');
+        for(let i=0;i<timeEl.options.length;i++) {
+            if(timeEl.options[i].value===a.time||timeEl.options[i].text===a.time) { timeEl.selectedIndex=i; break; }
+        }
+
+        // priority
+        activePriority = a.priority;
+        document.querySelectorAll('.priority-pill').forEach(p => {
+            p.classList.remove('active');
+            if(p.classList.contains(a.priority)) p.classList.add('active');
+        });
+
+        document.getElementById('modalTitle').textContent = '✏️ Edit Appointment';
+        document.getElementById('modalEditBanner').classList.add('visible');
+        setModalFooter('edit');
+        document.getElementById('modalOverlay').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('open');
+        editId = null;
+    }
+
+    function closeModalOutside(e) {
+        if(e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    function resetModalForm() {
+        document.getElementById('mDog').value    = 'buddy';
+        document.getElementById('mDoctor').value = '';
+        document.getElementById('mDate').value   = '2026-03-11';
+        document.getElementById('mOwner').value  = '';
+        document.getElementById('mPhone').value  = '';
+        document.getElementById('mNotes').value  = '';
+        document.getElementById('mTime').selectedIndex = 0;
+        document.getElementById('doctorAvailPreview').classList.remove('show');
+        activePriority = 'routine';
+        document.querySelectorAll('.priority-pill').forEach(p=>p.classList.remove('active'));
+        document.querySelector('.priority-pill.routine').classList.add('active');
+    }
+
+    function setModalFooter(mode) {
+        const f = document.getElementById('modalFooter');
+        if(mode==='edit') {
+            f.innerHTML = `
+                <button class="btn-cancel" onclick="resetModalFormAndSwitch()">↺ Reset</button>
+                <button class="btn-delete-modal" onclick="deleteAppt(${editId},null);closeModal()">🗑️ Delete</button>
+                <button class="btn-submit" onclick="updateAppt()">✏️ Update</button>
+            `;
+        } else {
+            f.innerHTML = `
+                <button class="btn-cancel" onclick="resetModalForm()">↺ Reset</button>
+                <button class="btn-submit" onclick="saveAppt()">📋 Save Appointment</button>
+            `;
+        }
+    }
+
+    function resetModalFormAndSwitch() {
+        resetModalForm();
+        document.getElementById('modalTitle').textContent = '🩺 Schedule Appointment';
+        document.getElementById('modalEditBanner').classList.remove('visible');
+        editId = null;
+        setModalFooter('new');
+    }
+
+    // ── SAVE ──────────────────────────────────────────────
+    function saveAppt() {
+        const dogKey = document.getElementById('mDog').value;
+        const docKey = document.getElementById('mDoctor').value;
+        if(!docKey){ showToast('⚠️ Please select a doctor.','amber'); return; }
+        const dm = dogMeta[dogKey];
+        const dr = doctorMeta[docKey];
+        const a = {
+            id: nextId++,
+            dog: dogKey, dogLabel: dm.label, dogEmoji: dm.emoji, dogBg: dm.bg, breed: dm.breed,
+            type: document.getElementById('mNotes').value.split('.')[0].trim()||'Visit',
+            risk: 'LOW RISK', time: document.getElementById('mTime').value,
+            owner: document.getElementById('mOwner').value||'Owner',
+            doctorKey: docKey, doctor: dr.label,
+            phone: document.getElementById('mPhone').value||'—',
+            status: 'pending', priority: activePriority,
+            notes: document.getElementById('mNotes').value||'No notes.',
+        };
+        appointments.unshift(a);
+        renderList();
+        showToast('📋 Appointment saved!','sage');
+        closeModal();
+    }
+
+    // ── UPDATE ────────────────────────────────────────────
+    function updateAppt() {
+        if(!editId) return;
+        const docKey = document.getElementById('mDoctor').value;
+        if(!docKey){ showToast('⚠️ Please select a doctor.','amber'); return; }
+        const idx = appointments.findIndex(a=>a.id===editId);
+        if(idx===-1) return;
+        const dogKey = document.getElementById('mDog').value;
+        const dm = dogMeta[dogKey];
+        const dr = doctorMeta[docKey];
+        appointments[idx] = {
+            ...appointments[idx],
+            dog: dogKey, dogLabel: dm.label, dogEmoji: dm.emoji, dogBg: dm.bg, breed: dm.breed,
+            time: document.getElementById('mTime').value,
+            owner: document.getElementById('mOwner').value||appointments[idx].owner,
+            doctorKey: docKey, doctor: dr.label,
+            phone: document.getElementById('mPhone').value||appointments[idx].phone,
+            priority: activePriority,
+            notes: document.getElementById('mNotes').value||appointments[idx].notes,
+        };
+        selectedId = editId;
+        updateDetailPanel(appointments[idx]);
+        renderList();
+        showToast('✏️ Appointment updated!','amber');
+        closeModal();
+    }
+
+    // ── DOCTOR AVAILABILITY PREVIEW ───────────────────────
+    function showDoctorAvail(sel) {
+        const preview = document.getElementById('doctorAvailPreview');
+        const dot     = document.getElementById('availDot');
+        const txt     = document.getElementById('availText');
+        const key     = sel.value;
+
+        if(!key){ preview.classList.remove('show'); return; }
+
+        const d = doctorMeta[key];
+        preview.classList.remove('avail-available','avail-limited','avail-full');
+
+        if(d.avail==='available'){
+            preview.classList.add('show','avail-available');
+            dot.className = 'avail-dot dot-green';
+            txt.textContent = `✅ Available — ${d.slots} (${d.spec})`;
+        } else if(d.avail==='limited'){
+            preview.classList.add('show','avail-limited');
+            dot.className = 'avail-dot dot-amber';
+            txt.textContent = `⚠️ Limited — ${d.slots} (${d.spec})`;
+        } else {
+            preview.classList.add('show','avail-full');
+            dot.className = 'avail-dot dot-red';
+            txt.textContent = `❌ ${d.slots} — ${d.spec}`;
+        }
+    }
+
+    // ── PRIORITY ──────────────────────────────────────────
     function setPriority(el, type) {
+        activePriority = type;
         document.querySelectorAll('.priority-pill').forEach(p => p.classList.remove('active'));
         el.classList.add('active');
     }
 
-    function submitAppt() {
-        closeModal();
-        showToast('🩺 Doctor appointment scheduled!', 'amber');
-    }
-
+    // ── TOAST ─────────────────────────────────────────────
     function showToast(msg, color) {
         const t = document.createElement('div');
         const colors = { sage:'#7A9E7E', rust:'#C0472A', amber:'#D4820A', sky:'#5B8FA8' };
-        t.style.cssText = `position:fixed;bottom:32px;right:32px;background:${colors[color]};color:#fff;padding:14px 22px;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:9999;animation:fadeUp 0.3s ease;`;
+        t.style.cssText = `position:fixed;bottom:32px;right:32px;background:${colors[color]||colors.amber};color:#fff;padding:14px 22px;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:9999;animation:fadeUp 0.3s ease;`;
         t.textContent = msg;
         document.body.appendChild(t);
-        setTimeout(() => t.remove(), 3000);
+        setTimeout(()=>t.remove(), 3000);
     }
 
-    // Animate stat counters
-    function countUp(el, target) {
-        let cur = 0;
-        const step = Math.ceil(target / 30);
-        const timer = setInterval(() => {
-            cur = Math.min(cur + step, target);
-            el.textContent = cur;
-            if (cur >= target) clearInterval(timer);
-        }, 30);
-    }
-
-    window.addEventListener('load', () => {
-        countUp(document.getElementById('totalCount'), 12);
-        countUp(document.getElementById('confirmedCount'), 7);
-        countUp(document.getElementById('pendingCount'), 3);
-        countUp(document.getElementById('urgentCount'), 2);
-    });
+    // ── INIT ──────────────────────────────────────────────
+    renderList();
 </script>
 </body>
 </html>

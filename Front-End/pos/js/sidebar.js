@@ -4,7 +4,7 @@
    ============================================================ */
 
 const ADMIN_NAV = [
-    { href:'admin-dashboard.html',       icon:'🏠', label:'Dashboard' },
+    { href:'admin-admin-dashboard.html',       icon:'🏠', label:'Dashboard' },
     { href:'dogs.html',                  icon:'🐕', label:'Dogs' },
     { href:'appointments.html',          icon:'📅', label:'Appointments', badge:3 },
     { href:'health-reports.html',        icon:'📋', label:'Health Reports' },
@@ -14,7 +14,7 @@ const ADMIN_NAV = [
 ];
 
 const OWNER_NAV = [
-    { href:'owner-dashboard.html',       icon:'🏠', label:'My Dashboard' },
+    { href:'owner-admin-dashboard.html',       icon:'🏠', label:'My Dashboard' },
     { href:'owner-dogs.html',            icon:'🐕', label:'My Dogs' },
     { href:'owner-appointments.html',    icon:'📅', label:'Book Daycare' },
     { href:'owner-doctor.html',          icon:'🩺', label:'Doctor Visits' },
@@ -23,14 +23,14 @@ const OWNER_NAV = [
 ];
 
 const CARETAKER_NAV = [
-    { href:'caretaker-dashboard.html',   icon:'🏠', label:'My Dashboard' },
+    { href:'caretaker-admin-dashboard.html',   icon:'🏠', label:'My Dashboard' },
     { href:'appointments.html',          icon:'📅', label:'My Schedule', badge:3 },
     { href:'health-reports.html',        icon:'📋', label:'Add Reports' },
     { href:'dogs.html',                  icon:'🐕', label:'Dog Profiles' },
 ];
 
 const DOCTOR_NAV = [
-    { href:'doctor-dashboard.html',      icon:'🏠', label:'My Dashboard' },
+    { href:'doctor-admin-dashboard.html',      icon:'🏠', label:'My Dashboard' },
     { href:'doctor-appointments.html',   icon:'🩺', label:'My Appointments', badge:2 },
     { href:'health-reports.html',        icon:'📋', label:'Health Reports' },
     { href:'vaccinations.html',          icon:'💉', label:'Vaccinations' },

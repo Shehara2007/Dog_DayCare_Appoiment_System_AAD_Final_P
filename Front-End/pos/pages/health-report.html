@@ -39,6 +39,12 @@
         .btn-primary:hover{background:var(--bark-light);transform:translateY(-1px)}
         .btn-outline{background:transparent;color:var(--bark);border:1.5px solid rgba(61,43,31,0.18)}
         .btn-outline:hover{background:var(--warm)}
+        .btn-danger{background:var(--rust);color:#fff;box-shadow:0 3px 14px rgba(192,71,42,0.25)}
+        .btn-danger:hover{background:#a33820;transform:translateY(-1px)}
+        .btn-warning{background:var(--amber);color:#fff;box-shadow:0 3px 14px rgba(212,130,10,0.25)}
+        .btn-warning:hover{background:#b36e08;transform:translateY(-1px)}
+        .btn-sage{background:var(--sage);color:#fff;box-shadow:0 3px 14px rgba(122,158,126,0.25)}
+        .btn-sage:hover{background:#5e8562;transform:translateY(-1px)}
         .content{padding:28px 32px}
 
         /* GRID LAYOUT */
@@ -76,10 +82,19 @@
         .risk-warning{padding:12px 14px;background:rgba(192,71,42,0.08);border-left:3px solid var(--rust);border-radius:8px;font-size:13px;color:var(--rust);margin-bottom:16px;display:none}
         .risk-warning strong{font-weight:700}
 
+        /* Form action buttons row */
+        .form-actions{display:flex;gap:10px;flex-wrap:wrap}
+        .form-actions .btn{flex:1;justify-content:center}
+
+        /* Edit mode indicator */
+        .edit-mode-banner{display:none;padding:10px 14px;background:rgba(212,130,10,0.1);border:1.5px solid var(--amber);border-radius:11px;font-size:13px;color:#8B5E00;font-weight:600;margin-bottom:16px;align-items:center;gap:8px}
+        .edit-mode-banner.visible{display:flex}
+
         /* REPORT HISTORY */
         .report-timeline{display:flex;flex-direction:column;gap:12px}
-        .rt-item{background:var(--white);border-radius:14px;padding:14px;box-shadow:0 1px 12px var(--shadow);border-left:3px solid;cursor:pointer;transition:transform 0.2s}
-        .rt-item:hover{transform:translateX(3px)}
+        .rt-item{background:var(--white);border-radius:14px;padding:14px;box-shadow:0 1px 12px var(--shadow);border-left:3px solid;cursor:pointer;transition:all 0.2s;position:relative}
+        .rt-item:hover{transform:translateX(3px);box-shadow:0 4px 20px var(--shadow)}
+        .rt-item.selected{outline:2px solid var(--amber);box-shadow:0 4px 24px rgba(212,130,10,0.2);transform:translateX(4px)}
         .rt-friendly{border-color:var(--sage)}
         .rt-active{border-color:var(--amber)}
         .rt-dangerous{border-color:var(--rust)}
@@ -99,10 +114,22 @@
         .rt-notes{font-size:12px;color:rgba(61,43,31,0.5);line-height:1.5}
         .rt-caretaker{font-size:11px;color:rgba(61,43,31,0.35);margin-top:6px}
 
+        /* selected-item inline action row */
+        .rt-actions{display:none;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(61,43,31,0.07)}
+        .rt-item.selected .rt-actions{display:flex}
+        .rt-actions .btn{padding:6px 12px;font-size:12px;flex:1;justify-content:center}
+
         /* RISK ALERT */
         .risk-alert-card{background:rgba(192,71,42,0.07);border:1.5px solid rgba(192,71,42,0.2);border-radius:16px;padding:18px;margin-bottom:20px;animation:fadeUp 0.5s ease 0.2s both}
         .ra-title{font-weight:700;font-size:14px;color:var(--rust);margin-bottom:4px;display:flex;align-items:center;gap:8px}
         .ra-desc{font-size:13px;color:rgba(61,43,31,0.6)}
+
+        /* Toast */
+        .toast{position:fixed;bottom:28px;right:28px;z-index:9999;padding:14px 20px;border-radius:14px;font-size:13px;font-weight:600;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.18);opacity:0;transform:translateY(16px);transition:all 0.3s;pointer-events:none}
+        .toast.show{opacity:1;transform:translateY(0)}
+        .toast-success{background:var(--sage)}
+        .toast-error{background:var(--rust)}
+        .toast-info{background:var(--amber)}
 
         ::-webkit-scrollbar{width:5px}
         ::-webkit-scrollbar-thumb{background:rgba(61,43,31,0.15);border-radius:10px}
@@ -118,7 +145,7 @@
         </div>
         <div class="sidebar-nav">
             <div class="nav-section-label">Main</div>
-            <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+            <a class="nav-item" href="admin-dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
             <a class="nav-item" href="appointments.html"><span class="nav-icon">📅</span> Appointments <span class="nav-badge">3</span></a>
             <a class="nav-item" href="dog-profile.html"><span class="nav-icon">🐕</span> Dog Profiles</a>
             <a class="nav-item active" href="health-report.html"><span class="nav-icon">🏥</span> Health Reports</a>
@@ -150,7 +177,7 @@
             </div>
             <div class="topbar-actions">
                 <button class="btn btn-outline">📊 Export Reports</button>
-                <button class="btn btn-primary">+ New Report</button>
+                <button class="btn btn-primary" onclick="resetForm()">+ New Report</button>
             </div>
         </div>
 
@@ -165,9 +192,14 @@
                 <!-- Report Form -->
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Add Visit Report</div>
+                        <div class="card-title" id="formTitle">Add Visit Report</div>
                     </div>
                     <div class="card-body">
+                        <!-- Edit mode banner -->
+                        <div class="edit-mode-banner" id="editBanner">
+                            ✏️ Editing report — make changes and click <strong>Update</strong>
+                        </div>
+
                         <div class="risk-warning" id="riskWarn">
                             🚨 <strong>HIGH RISK DOG!</strong> This dog has 3+ dangerous reports. Please take extra precautions.
                         </div>
@@ -175,7 +207,7 @@
                         <div class="form-grid-2">
                             <div class="form-group">
                                 <label class="form-label">Dog</label>
-                                <select class="form-select" onchange="checkRisk(this)">
+                                <select class="form-select" id="fDog" onchange="checkRisk(this)">
                                     <option value="">Select dog…</option>
                                     <option value="buddy">🐶 Buddy</option>
                                     <option value="luna">🐩 Luna</option>
@@ -187,13 +219,13 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Report Date</label>
-                                <input class="form-input" type="date" value="2026-03-03">
+                                <input class="form-input" type="date" id="fDate" value="2026-03-11">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Behaviour Type</label>
-                            <div class="behaviour-pills">
+                            <div class="behaviour-pills" id="bPills">
                                 <div class="bpill" onclick="selectBehaviour(this,'friendly')">🟢 Friendly</div>
                                 <div class="bpill" onclick="selectBehaviour(this,'active')">🟡 Active</div>
                                 <div class="bpill" onclick="selectBehaviour(this,'dangerous')">🔴 Dangerous</div>
@@ -202,7 +234,7 @@
 
                         <div class="form-group">
                             <label class="form-label">Health Condition</label>
-                            <div class="health-pills">
+                            <div class="health-pills" id="hPills">
                                 <div class="hpill" onclick="selectHealth(this,'healthy')">✅ Healthy</div>
                                 <div class="hpill" onclick="selectHealth(this,'minor')">⚠️ Minor Issue</div>
                                 <div class="hpill" onclick="selectHealth(this,'serious')">🚨 Serious Issue</div>
@@ -211,38 +243,41 @@
 
                         <div class="form-group">
                             <label class="form-label">Eating Behaviour</label>
-                            <select class="form-select">
-                                <option>Ate normally</option>
-                                <option>Ate less than usual</option>
-                                <option>Did not eat</option>
-                                <option>Ate more than usual</option>
+                            <select class="form-select" id="fEating">
+                                <option value="normal">Ate normally</option>
+                                <option value="less">Ate less than usual</option>
+                                <option value="none">Did not eat</option>
+                                <option value="more">Ate more than usual</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Detailed Notes</label>
-                            <textarea class="form-textarea" rows="4" placeholder="Describe the dog's behaviour, any incidents, interactions with other dogs, notable observations…"></textarea>
+                            <textarea class="form-textarea" id="fNotes" rows="4" placeholder="Describe the dog's behaviour, any incidents, interactions with other dogs, notable observations…"></textarea>
                         </div>
 
                         <div class="form-grid-2">
                             <div class="form-group">
                                 <label class="form-label">Caretaker</label>
-                                <select class="form-select">
-                                    <option>Maria Santos</option>
-                                    <option>Tom Baker</option>
-                                    <option>Kelly Park</option>
+                                <select class="form-select" id="fCaretaker">
+                                    <option value="Maria Santos">Maria Santos</option>
+                                    <option value="Tom Baker">Tom Baker</option>
+                                    <option value="Kelly Park">Kelly Park</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Notify Owner?</label>
-                                <select class="form-select">
-                                    <option>Yes — Send notification</option>
-                                    <option>No</option>
+                                <select class="form-select" id="fNotify">
+                                    <option value="yes">Yes — Send notification</option>
+                                    <option value="no">No</option>
                                 </select>
                             </div>
                         </div>
 
-                        <button class="btn btn-primary" style="width:100%" onclick="submitReport()">📋 Save Report</button>
+                        <!-- Action Buttons -->
+                        <div class="form-actions" id="formActions">
+                            <!-- Populated by JS based on mode -->
+                        </div>
                     </div>
                 </div>
 
@@ -253,71 +288,8 @@
                         <span style="font-size:12px;color:var(--amber);font-weight:600;cursor:pointer">All →</span>
                     </div>
                     <div class="card-body">
-                        <div class="report-timeline">
-                            <div class="rt-item rt-dangerous">
-                                <div class="rt-header">
-                                    <div class="rt-dog"><span class="rt-emoji">🐾</span><div><div class="rt-name">Rocky</div></div></div>
-                                    <div class="rt-date">Mar 3, 2026</div>
-                                </div>
-                                <div class="rt-badges">
-                                    <span class="rt-badge b-dangerous">🔴 Dangerous</span>
-                                    <span class="rt-badge b-minor">⚠️ Minor Issue</span>
-                                </div>
-                                <div class="rt-notes">Showed aggression toward Buddy during play. Separated immediately.</div>
-                                <div class="rt-caretaker">👷 Maria Santos</div>
-                            </div>
-
-                            <div class="rt-item rt-friendly">
-                                <div class="rt-header">
-                                    <div class="rt-dog"><span class="rt-emoji">🐶</span><div><div class="rt-name">Buddy</div></div></div>
-                                    <div class="rt-date">Mar 3, 2026</div>
-                                </div>
-                                <div class="rt-badges">
-                                    <span class="rt-badge b-friendly">🟢 Friendly</span>
-                                    <span class="rt-badge b-healthy">✅ Healthy</span>
-                                </div>
-                                <div class="rt-notes">Excellent behaviour. Played well with all dogs. Ate full portion.</div>
-                                <div class="rt-caretaker">👷 Maria Santos</div>
-                            </div>
-
-                            <div class="rt-item rt-active">
-                                <div class="rt-header">
-                                    <div class="rt-dog"><span class="rt-emoji">🐩</span><div><div class="rt-name">Luna</div></div></div>
-                                    <div class="rt-date">Mar 2, 2026</div>
-                                </div>
-                                <div class="rt-badges">
-                                    <span class="rt-badge b-active">🟡 Active</span>
-                                    <span class="rt-badge b-minor">⚠️ Minor Issue</span>
-                                </div>
-                                <div class="rt-notes">Lethargic in afternoon. Did not eat dinner. Owner notified. Vet visit arranged.</div>
-                                <div class="rt-caretaker">👷 Tom Baker</div>
-                            </div>
-
-                            <div class="rt-item rt-friendly">
-                                <div class="rt-header">
-                                    <div class="rt-dog"><span class="rt-emoji">🐕‍🦺</span><div><div class="rt-name">Max</div></div></div>
-                                    <div class="rt-date">Mar 2, 2026</div>
-                                </div>
-                                <div class="rt-badges">
-                                    <span class="rt-badge b-friendly">🟢 Friendly</span>
-                                    <span class="rt-badge b-healthy">✅ Healthy</span>
-                                </div>
-                                <div class="rt-notes">Perfect visit. Very calm and well-behaved. Good appetite.</div>
-                                <div class="rt-caretaker">👷 Kelly Park</div>
-                            </div>
-
-                            <div class="rt-item rt-dangerous">
-                                <div class="rt-header">
-                                    <div class="rt-dog"><span class="rt-emoji">🐾</span><div><div class="rt-name">Rocky</div></div></div>
-                                    <div class="rt-date">Feb 28, 2026</div>
-                                </div>
-                                <div class="rt-badges">
-                                    <span class="rt-badge b-dangerous">🔴 Dangerous</span>
-                                    <span class="rt-badge b-healthy">✅ Healthy</span>
-                                </div>
-                                <div class="rt-notes">Bit caretaker's sleeve. Kept isolated from other dogs.</div>
-                                <div class="rt-caretaker">👷 Tom Baker</div>
-                            </div>
+                        <div class="report-timeline" id="reportTimeline">
+                            <!-- Rendered by JS -->
                         </div>
                     </div>
                 </div>
@@ -326,21 +298,260 @@
     </main>
 </div>
 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script>
+    // ── DATA ──────────────────────────────────────────────
+    let reports = [
+        {id:1, dog:'rocky', dogLabel:'Rocky', dogEmoji:'🐾', date:'2026-03-03', behaviour:'dangerous', health:'minor', eating:'normal', notes:'Showed aggression toward Buddy during play. Separated immediately.', caretaker:'Maria Santos', notify:'yes'},
+        {id:2, dog:'buddy', dogLabel:'Buddy', dogEmoji:'🐶', date:'2026-03-03', behaviour:'friendly', health:'healthy', eating:'normal', notes:'Excellent behaviour. Played well with all dogs. Ate full portion.', caretaker:'Maria Santos', notify:'no'},
+        {id:3, dog:'luna', dogLabel:'Luna', dogEmoji:'🐩', date:'2026-03-02', behaviour:'active', health:'minor', eating:'none', notes:'Lethargic in afternoon. Did not eat dinner. Owner notified. Vet visit arranged.', caretaker:'Tom Baker', notify:'yes'},
+        {id:4, dog:'max', dogLabel:'Max', dogEmoji:'🐕‍🦺', date:'2026-03-02', behaviour:'friendly', health:'healthy', eating:'normal', notes:'Perfect visit. Very calm and well-behaved. Good appetite.', caretaker:'Kelly Park', notify:'no'},
+        {id:5, dog:'rocky', dogLabel:'Rocky', dogEmoji:'🐾', date:'2026-02-28', behaviour:'dangerous', health:'healthy', eating:'less', notes:"Bit caretaker's sleeve. Kept isolated from other dogs.", caretaker:'Tom Baker', notify:'yes'},
+    ];
+    let nextId = 6;
+    let selectedId = null; // currently selected report in list
+    let editId = null;     // id being edited in form (null = add mode)
+    let activeBehaviour = null;
+    let activeHealth = null;
+
+    const dogMeta = {
+        buddy:  {label:'Buddy',  emoji:'🐶'},
+        luna:   {label:'Luna',   emoji:'🐩'},
+        max:    {label:'Max',    emoji:'🐕‍🦺'},
+        coco:   {label:'Coco',   emoji:'🦮'},
+        bella:  {label:'Bella',  emoji:'🐶'},
+        rocky:  {label:'Rocky',  emoji:'🐾'},
+    };
+
+    // ── RENDER TIMELINE ───────────────────────────────────
+    function renderTimeline() {
+        const container = document.getElementById('reportTimeline');
+        container.innerHTML = '';
+        reports.forEach(r => {
+            const div = document.createElement('div');
+            div.className = `rt-item rt-${r.behaviour}${r.id===selectedId?' selected':''}`;
+            div.dataset.id = r.id;
+            div.innerHTML = `
+                <div class="rt-header">
+                    <div class="rt-dog"><span class="rt-emoji">${r.dogEmoji}</span><div><div class="rt-name">${r.dogLabel}</div></div></div>
+                    <div class="rt-date">${formatDate(r.date)}</div>
+                </div>
+                <div class="rt-badges">
+                    ${behaviourBadge(r.behaviour)}
+                    ${healthBadge(r.health)}
+                </div>
+                <div class="rt-notes">${r.notes}</div>
+                <div class="rt-caretaker">👷 ${r.caretaker}</div>
+                <div class="rt-actions">
+                    <button class="btn btn-warning" onclick="editReport(${r.id},event)">✏️ Edit</button>
+                    <button class="btn btn-danger" onclick="deleteReport(${r.id},event)">🗑️ Delete</button>
+                </div>
+            `;
+            div.addEventListener('click', () => selectReport(r.id));
+            container.appendChild(div);
+        });
+    }
+
+    function behaviourBadge(b){
+        const map={friendly:'🟢 Friendly',active:'🟡 Active',dangerous:'🔴 Dangerous'};
+        return `<span class="rt-badge b-${b}">${map[b]||b}</span>`;
+    }
+    function healthBadge(h){
+        const map={healthy:'✅ Healthy',minor:'⚠️ Minor Issue',serious:'🚨 Serious Issue'};
+        return `<span class="rt-badge b-${h}">${map[h]||h}</span>`;
+    }
+    function formatDate(d){
+        const dt=new Date(d+'T00:00:00');
+        return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    }
+
+    // ── SELECT REPORT ─────────────────────────────────────
+    function selectReport(id) {
+        if (selectedId === id) {
+            // deselect
+            selectedId = null;
+        } else {
+            selectedId = id;
+        }
+        renderTimeline();
+    }
+
+    // ── EDIT REPORT ───────────────────────────────────────
+    function editReport(id, event) {
+        event.stopPropagation();
+        const r = reports.find(x=>x.id===id);
+        if (!r) return;
+        editId = id;
+        selectedId = id;
+
+        // Populate form
+        document.getElementById('fDog').value = r.dog;
+        checkRisk(document.getElementById('fDog'));
+        document.getElementById('fDate').value = r.date;
+        document.getElementById('fEating').value = r.eating;
+        document.getElementById('fNotes').value = r.notes;
+        document.getElementById('fCaretaker').value = r.caretaker;
+        document.getElementById('fNotify').value = r.notify;
+
+        // Behaviour pills
+        activeBehaviour = r.behaviour;
+        document.querySelectorAll('.bpill').forEach(p=>{
+            p.className='bpill';
+            if(p.textContent.toLowerCase().includes(r.behaviour)) p.classList.add('sel-'+r.behaviour);
+        });
+
+        // Health pills
+        activeHealth = r.health;
+        const hMap={healthy:'healthy',minor:'minor',serious:'serious'};
+        document.querySelectorAll('.hpill').forEach(p=>{
+            p.className='hpill';
+            const key=Object.keys(hMap).find(k=>p.textContent.toLowerCase().includes(k));
+            if(key===r.health) p.classList.add('sel-'+r.health);
+        });
+
+        setFormMode('edit');
+        renderTimeline();
+        document.querySelector('.card').scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    // ── DELETE REPORT ─────────────────────────────────────
+    function deleteReport(id, event) {
+        if(event) event.stopPropagation();
+        if (!confirm('Delete this report? This cannot be undone.')) return;
+        reports = reports.filter(x=>x.id!==id);
+        if (selectedId===id) selectedId=null;
+        if (editId===id) { editId=null; resetForm(); return; }
+        renderTimeline();
+        showToast('🗑️ Report deleted.','error');
+    }
+
+    // ── FORM MODE ─────────────────────────────────────────
+    function setFormMode(mode) {
+        const actions = document.getElementById('formActions');
+        const banner = document.getElementById('editBanner');
+        const title = document.getElementById('formTitle');
+
+        if (mode==='edit') {
+            title.textContent = 'Edit Report';
+            banner.classList.add('visible');
+            actions.innerHTML = `
+                <button class="btn btn-warning" style="flex:2" onclick="updateReport()">✏️ Update</button>
+                <button class="btn btn-danger" onclick="deleteReport(${editId},event)">🗑️ Delete</button>
+                <button class="btn btn-outline" onclick="resetForm()">↺ Reset</button>
+            `;
+        } else {
+            title.textContent = 'Add Visit Report';
+            banner.classList.remove('visible');
+            actions.innerHTML = `
+                <button class="btn btn-primary" style="flex:2" onclick="saveReport()">📋 Save Report</button>
+                <button class="btn btn-outline" onclick="resetForm()">↺ Reset</button>
+            `;
+        }
+    }
+
+    // ── SAVE ──────────────────────────────────────────────
+    function saveReport() {
+        const dog = document.getElementById('fDog').value;
+        if (!dog) { showToast('⚠️ Please select a dog.','info'); return; }
+        if (!activeBehaviour) { showToast('⚠️ Please select a behaviour type.','info'); return; }
+        if (!activeHealth) { showToast('⚠️ Please select a health condition.','info'); return; }
+
+        const meta = dogMeta[dog]||{label:dog,emoji:'🐾'};
+        const r = {
+            id: nextId++,
+            dog, dogLabel:meta.label, dogEmoji:meta.emoji,
+            date: document.getElementById('fDate').value,
+            behaviour: activeBehaviour,
+            health: activeHealth,
+            eating: document.getElementById('fEating').value,
+            notes: document.getElementById('fNotes').value||'No notes.',
+            caretaker: document.getElementById('fCaretaker').value,
+            notify: document.getElementById('fNotify').value,
+        };
+        reports.unshift(r);
+        renderTimeline();
+        showToast('✅ Report saved successfully!','success');
+        resetForm();
+    }
+
+    // ── UPDATE ────────────────────────────────────────────
+    function updateReport() {
+        if (!editId) return;
+        const dog = document.getElementById('fDog').value;
+        if (!dog) { showToast('⚠️ Please select a dog.','info'); return; }
+        if (!activeBehaviour) { showToast('⚠️ Please select a behaviour type.','info'); return; }
+        if (!activeHealth) { showToast('⚠️ Please select a health condition.','info'); return; }
+
+        const meta = dogMeta[dog]||{label:dog,emoji:'🐾'};
+        const idx = reports.findIndex(x=>x.id===editId);
+        if (idx===-1) return;
+        reports[idx] = {
+            ...reports[idx],
+            dog, dogLabel:meta.label, dogEmoji:meta.emoji,
+            date: document.getElementById('fDate').value,
+            behaviour: activeBehaviour,
+            health: activeHealth,
+            eating: document.getElementById('fEating').value,
+            notes: document.getElementById('fNotes').value||'No notes.',
+            caretaker: document.getElementById('fCaretaker').value,
+            notify: document.getElementById('fNotify').value,
+        };
+        selectedId = editId;
+        editId = null;
+        renderTimeline();
+        showToast('✏️ Report updated successfully!','success');
+        setFormMode('add');
+    }
+
+    // ── RESET ─────────────────────────────────────────────
+    function resetForm() {
+        editId = null;
+        selectedId = null;
+        activeBehaviour = null;
+        activeHealth = null;
+
+        document.getElementById('fDog').value = '';
+        document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('fEating').value = 'normal';
+        document.getElementById('fNotes').value = '';
+        document.getElementById('fCaretaker').value = 'Maria Santos';
+        document.getElementById('fNotify').value = 'yes';
+        document.getElementById('riskWarn').style.display = 'none';
+
+        document.querySelectorAll('.bpill').forEach(p=>p.className='bpill');
+        document.querySelectorAll('.hpill').forEach(p=>p.className='hpill');
+
+        setFormMode('add');
+        renderTimeline();
+    }
+
+    // ── HELPERS ───────────────────────────────────────────
     function checkRisk(el){
         document.getElementById('riskWarn').style.display = el.value==='rocky'?'block':'none';
     }
     function selectBehaviour(el,type){
+        activeBehaviour = type;
         document.querySelectorAll('.bpill').forEach(p=>{p.className='bpill'});
         el.classList.add('sel-'+type);
     }
     function selectHealth(el,type){
+        activeHealth = type;
         document.querySelectorAll('.hpill').forEach(p=>{p.className='hpill'});
         el.classList.add('sel-'+type);
     }
-    function submitReport(){
-        alert('✅ Report saved successfully! Owner has been notified.');
+
+    function showToast(msg, type='success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast toast-${type} show`;
+        setTimeout(()=>t.classList.remove('show'), 3000);
     }
+
+    // ── INIT ──────────────────────────────────────────────
+    setFormMode('add');
+    renderTimeline();
 </script>
 </body>
 </html>

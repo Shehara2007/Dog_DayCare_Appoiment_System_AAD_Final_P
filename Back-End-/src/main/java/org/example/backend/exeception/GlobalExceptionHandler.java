@@ -65,21 +65,21 @@ public class GlobalExceptionHandler {
         );
     }
 
-//    @ExceptionHandler(ItemNotFoundException.class)
-//    public ResponseEntity<APIResponse<String>> handleItemNotFoundException(ItemNotFoundException e) {
-//        return new ResponseEntity<>(
-//                new APIResponse<>(HttpStatus.NOT_FOUND.value(), "Item Not Found", e.getMessage()),
-//                HttpStatus.NOT_FOUND
-//        );
-//    }
-//
-//    @ExceptionHandler(OrderNotFoundException.class)
-//    public ResponseEntity<APIResponse<String>> handleOrderNotFoundException(OrderNotFoundException e) {
-//        return new ResponseEntity<>(
-//                new APIResponse<>(HttpStatus.NOT_FOUND.value(), "Order Not Found", e.getMessage()),
-//                HttpStatus.NOT_FOUND
-//        );
-//    }
+    @ExceptionHandler(DoctorAppointmentsNotFoundException.class)
+    public ResponseEntity<APIResponse<String>> handleItemNotFoundException(DoctorAppointmentsNotFoundException e) {
+        return new ResponseEntity<>(
+                new APIResponse<>(HttpStatus.NOT_FOUND.value(), "Item Not Found", e.getMessage()),
+                HttpStatus.NOT_FOUND
+        );
+    }
+
+    @ExceptionHandler(HealthReportNotFoundException.class)
+    public ResponseEntity<APIResponse<String>> handleOrderNotFoundException(HealthReportNotFoundException e) {
+        return new ResponseEntity<>(
+                new APIResponse<>(HttpStatus.NOT_FOUND.value(), "Order Not Found", e.getMessage()),
+                HttpStatus.NOT_FOUND
+        );
+    }
 //
 //    // Handles not enough stock when placing an order
 //    @ExceptionHandler(InsufficientStockException.class)
