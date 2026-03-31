@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daycare Appointments | PawCare</title>
+    <link rel="stylesheet" href="../../../css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+
+        a.active-page, button.active-page {
+            background: linear-gradient(135deg, #FF8C42, #F5A623) !important;
+            color: white !important; border-radius: 12px !important;
+            box-shadow: 0 4px 15px rgba(255,140,66,0.45) !important;
+        }
+
+        .appt-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+        }
+        @media(min-width:1024px) {
+            .appt-layout.split { grid-template-columns: 380px 1fr; }
+        }
+
+        /* Booking card */
+        .booking-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2.2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: sticky; top: 2rem;
+            height: fit-content;
+        }
+        .booking-card-header {
+            display: flex; align-items: center; gap: 0.8rem;
+            margin-bottom: 0.4rem;
+        }
+        .booking-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg,#FF8C42,#F5A623);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: white;
+            box-shadow: 0 4px 12px rgba(255,140,66,0.35);
+        }
+        .booking-card h2 { font-family:'Fredoka One',cursive; font-size:1.4rem; color:#1e293b; }
+        .booking-card .sub { color:#94a3b8; font-size:0.85rem; margin-bottom:1.8rem; font-weight:600; }
+
+        .form-field { margin-bottom: 1.1rem; }
+        .form-field label {
+            display: block; font-size: 0.75rem; font-weight: 800;
+            color: #64748b; text-transform: uppercase; letter-spacing: 0.06em;
+            margin-bottom: 0.35rem;
+        }
+        .form-input {
+            width: 100%; padding: 0.7rem 1rem;
+            border: 2px solid #f1f5f9; border-radius: 12px;
+            font-size: 0.9rem; font-family: 'Nunito', sans-serif; font-weight: 600;
+            color: #1e293b; background: #fafbfc;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+        .form-input:focus { outline:none; border-color:#FF8C42; box-shadow:0 0 0 4px rgba(255,140,66,0.12); background:white; }
+
+        .submit-btn {
+            width: 100%; padding: 0.9rem;
+            background: linear-gradient(135deg,#FF8C42,#F5A623);
+            color: white; border: none; border-radius: 14px;
+            font-size: 0.95rem; font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer; margin-top: 1.5rem;
+            box-shadow: 0 6px 18px rgba(255,140,66,0.4);
+            transition: all 0.25s ease;
+        }
+        .submit-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 24px rgba(255,140,66,0.5); }
+
+        /* Appointments list */
+        .sessions-panel {
+            background: transparent;
+        }
+        .sessions-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.4rem; color: #1e293b;
+            margin-bottom: 1.5rem; padding: 0 0.25rem;
+        }
+
+        /* Appointment cards */
+        .appt-card {
+            background: white;
+            border-radius: 18px;
+            padding: 1.3rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            display: flex; align-items: center; gap: 1.2rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: slideIn 0.3s ease both;
+        }
+        @keyframes slideIn { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+        .appt-card:hover { transform: translateX(4px); box-shadow: 0 6px 22px rgba(0,0,0,0.1); }
+
+        .appt-dog-icon {
+            width: 50px; height: 50px; min-width: 50px;
+            background: linear-gradient(135deg,#FFF3E8,#FFE0C2);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+        }
+
+        .appt-info { flex: 1; min-width: 0; }
+        .appt-dog-name { font-family:'Fredoka One',cursive; font-size:1.05rem; color:#1e293b; margin-bottom:2px; }
+        .appt-meta { font-size:0.78rem; color:#94a3b8; font-weight:700; }
+        .appt-meta span { margin-right: 0.75rem; }
+
+        .appt-right { text-align: right; display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem; }
+        .appt-schedule { font-size:0.82rem; font-weight:700; color:#475569; }
+        .appt-time { font-size:0.72rem; color:#94a3b8; margin-top:1px; }
+
+        /* Status badges */
+        .status-pill {
+            padding: 0.32rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.7rem; font-weight: 800;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .sp-pending  { background:#fffbeb; color:#b45309; }
+        .sp-approved { background:#ecfdf5; color:#047857; }
+        .sp-cancelled{ background:#fef2f2; color:#b91c1c; }
+
+        /* Admin action buttons */
+        .admin-actions { display:flex; gap:0.4rem; margin-top:0.35rem; }
+        .act-btn {
+            padding: 0.3rem 0.7rem;
+            border-radius: 8px;
+            font-size: 0.7rem; font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer; border: none;
+            transition: all 0.18s ease;
+        }
+        .act-btn:hover { transform:scale(1.06); }
+        .act-approve { background:linear-gradient(135deg,#4CAF82,#7DDDAD); color:white; }
+        .act-cancel  { background:#FFF1F2; color:#e11d48; }
+
+        .empty-state { text-align:center; padding:4rem 2rem; color:#94a3b8; }
+        .empty-emoji { font-size:3rem; display:block; margin-bottom:1rem; animation:float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <main class="main-content-premium">
+        <div id="notice" class="notice"></div>
+        <header style="margin-bottom:2.5rem;">
+            <h1 class="text-gradient" style="font-family:'Fredoka One',cursive;font-size:2rem;">Daycare Appointments 🏠</h1>
+            <p style="color:var(--text-muted);font-weight:600;">Schedule and manage your pet's daycare stays.</p>
+        </header>
+
+        <div class="appt-layout" id="mainGrid">
+            <!-- Booking Form -->
+            <div class="booking-card" id="createSection">
+                <div class="booking-card-header">
+                    <div class="booking-icon">🏠</div>
+                    <div>
+                        <h2>Book a Session</h2>
+                    </div>
+                </div>
+                <p class="sub">Quickly schedule your pet's next daycare visit.</p>
+                <form id="daycareForm">
+                    <div class="form-field">
+                        <label>Who's visiting?</label>
+                        <select id="dogId" class="form-input" required>
+                            <option value="">Select a pet</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Select Caretaker</label>
+                        <select id="caretakerId" class="form-input" required>
+                            <option value="">Select staff</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Arrival Time</label>
+                        <input type="datetime-local" id="startTime" class="form-input" required>
+                    </div>
+                    <div class="form-field">
+                        <label>Departure Time</label>
+                        <input type="datetime-local" id="endTime" class="form-input" required>
+                    </div>
+                    <button type="submit" class="submit-btn">🐾 Confirm Booking</button>
+                </form>
+            </div>
+
+            <!-- Sessions List -->
+            <div class="sessions-panel">
+                <div class="sessions-title">Upcoming Sessions</div>
+                <div id="apptList">
+                    <div class="empty-state"><span class="empty-emoji">⏳</span><p style="font-weight:700">Loading appointments...</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="../../../lib/jquery-3.7.1.min.js"></script>
+<script src="../../js/auth.js"></script>
+<script src="../../js/notification.js"></script>
+<script src="../../js/layout.js"></script>
+<script>
+    $(document).ready(function() {
+        DogDaycareLayout.init();
+        const session = DogDaycareAuth.getSession();
+        if (!session) { window.location.href = DogDaycareLayout.relPath + 'login.html'; return; }
+
+        const curr = location.pathname.split('/').pop();
+        $('a').each(function(){
+            if($(this).attr('href')&&$(this).attr('href').split('/').pop().split('?')[0]===curr)
+                $(this).addClass('active-page');
+        });
+
+        const canCreate = session.role === 'PET_OWNER' || session.role === 'ADMIN';
+        const isAdmin = session.role === 'ADMIN';
+
+        if (canCreate) {
+            $('#mainGrid').addClass('split');
+            loadDogDropdown();
+            loadStaffDropdown();
+        } else {
+            $('#createSection').hide();
+        }
+
+        function loadDogDropdown() {
+            DogDaycareAuth.getDogsByOwner(session.userId).done(dogs => {
+                const $s = $('#dogId'); $s.empty();
+                if (!dogs.length) { $s.append('<option value="">No dogs registered</option>'); return; }
+                const pre = new URLSearchParams(window.location.search).get('dogId');
+                dogs.forEach(d => $s.append(`<option value="${d.id}" ${d.id==pre?'selected':''}>${d.name}</option>`));
+            });
+        }
+
+        function loadStaffDropdown() {
+            DogDaycareAuth.getPublicUsersByRole('CARETAKER').done(staff => {
+                const $s = $('#caretakerId'); $s.empty();
+                if (!staff.length) { $s.append('<option value="">No caretakers available</option>'); return; }
+                staff.forEach(s => $s.append(`<option value="${s.id}">${s.name}</option>`));
+            });
+        }
+
+        function loadAppointments() {
+            DogDaycareAuth.getDogsByOwner(session.userId).done(dogs => {
+                if (!dogs.length) {
+                    $('#apptList').html('<div class="empty-state"><span class="empty-emoji">🐾</span><p style="font-weight:700">No dogs registered yet.</p></div>');
+                    return;
+                }
+                let all = [], done = 0;
+                dogs.forEach(dog => {
+                    DogDaycareAuth.getDaycareByDog(dog.id).done(appts => {
+                        appts.forEach(a => { a.dogName = dog.name; all.push(a); });
+                    }).always(() => {
+                        done++;
+                        if (done === dogs.length) renderAppts(all);
+                    });
+                });
+            }).fail(() => {
+                $('#apptList').html('<div class="empty-state" style="color:#e11d48">❌ Failed to load. Please try again.</div>');
+            });
+        }
+
+        function renderAppts(appts) {
+            const $l = $('#apptList');
+            $l.empty();
+            if (!appts.length) {
+                $l.html('<div class="empty-state"><span class="empty-emoji">🗓️</span><p style="font-weight:700">No sessions booked yet.</p><p style="font-size:0.85rem">Use the form to schedule a daycare visit!</p></div>');
+                return;
+            }
+            appts.sort((a,b)=>new Date(b.startTime)-new Date(a.startTime)).forEach((a,i) => {
+                const status = a.status || 'PENDING';
+                const spCls = 'sp-'+status.toLowerCase();
+                const showAct = isAdmin && status === 'PENDING';
+                const d = new Date(a.startTime);
+                $l.append(`
+                        <div class="appt-card" style="animation-delay:${i*0.06}s">
+                            <div class="appt-dog-icon">🐕</div>
+                            <div class="appt-info">
+                                <div class="appt-dog-name">${a.dogName}</div>
+                                <div class="appt-meta">
+                                    <span>👤 ${a.caretakerName||'Staff Member'}</span>
+                                </div>
+                                ${showAct ? `
+                                    <div class="admin-actions">
+                                        <button onclick="updateStatus(${a.id},'APPROVED')" class="act-btn act-approve">✅ Approve</button>
+                                        <button onclick="updateStatus(${a.id},'CANCELLED')" class="act-btn act-cancel">❌ Cancel</button>
+                                    </div>` : ''}
+                            </div>
+                            <div class="appt-right">
+                                <div class="appt-schedule">${d.toLocaleDateString()}</div>
+                                <div class="appt-time">${new Date(a.startTime).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} – ${new Date(a.endTime).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+                                <span class="status-pill ${spCls}">${status}</span>
+                            </div>
+                        </div>`);
+            });
+        }
+
+        window.updateStatus = function(id, status) {
+            DogDaycareAuth.updateDaycareStatus(id, status).done(() => {
+                $('#notice').text('✅ Status updated!').addClass('notice-success').fadeIn();
+                loadAppointments();
+                setTimeout(()=>$('#notice').fadeOut(), 3000);
+            }).fail(xhr => {
+                $('#notice').text(xhr.responseJSON?.message||'Error updating').addClass('notice-error').fadeIn();
+            });
+        };
+
+        loadAppointments();
+
+        $('#daycareForm').on('submit', function(e) {
+            e.preventDefault();
+            const p = {
+                dogId: Number($('#dogId').val()),
+                caretakerId: Number($('#caretakerId').val()),
+                startTime: $('#startTime').val().length===16 ? $('#startTime').val()+':00' : $('#startTime').val(),
+                endTime:   $('#endTime').val().length===16   ? $('#endTime').val()+':00'   : $('#endTime').val()
+            };
+            DogDaycareAuth.bookDaycare(p).done(() => {
+                $('#notice').text('🏠 Daycare session scheduled!').addClass('notice-success').fadeIn();
+                $('#daycareForm')[0].reset(); loadAppointments();
+                setTimeout(()=>$('#notice').fadeOut(), 3000);
+            }).fail(xhr => {
+                $('#notice').text(xhr.responseJSON?.message||'Failed to schedule').addClass('notice-error').fadeIn();
+            });
+        });
+    });
+</script>
+</body>
+</html>

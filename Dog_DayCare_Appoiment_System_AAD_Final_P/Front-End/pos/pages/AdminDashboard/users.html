@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | PawCare</title>
+    <link rel="stylesheet" href="../../../css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        a.active-page, button.active-page {
+            background: linear-gradient(135deg, #FF8C42, #F5A623) !important;
+            color: white !important; border-radius: 12px !important;
+            box-shadow: 0 4px 15px rgba(255,140,66,0.45) !important;
+        }
+        .navbar-premium {
+            background: linear-gradient(135deg, rgba(248,250,252,0.97), rgba(241,245,249,0.97)) !important;
+            border-bottom: 2px solid rgba(100,116,139,0.15) !important;
+        }
+        .navbar-page-accent {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-size: 0.78rem; font-weight: 800; color: #334155;
+            background: rgba(100,116,139,0.12);
+            padding: 0.28rem 0.85rem; border-radius: 99px;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        /* Page header */
+        .page-header { margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+        .page-header-left h1 { font-family:'Fredoka One',cursive; font-size:2rem; color:#1e293b; margin-bottom:4px; }
+        .page-header-left p { color:#94a3b8; font-weight:600; font-size:0.9rem; }
+        .btn-add {
+            background:linear-gradient(135deg,#FF8C42,#F5A623); color:white;
+            border:none; border-radius:16px; padding:0.75rem 1.5rem;
+            font-size:0.88rem; font-weight:800; font-family:'Nunito',sans-serif;
+            cursor:pointer; display:flex; align-items:center; gap:0.5rem;
+            box-shadow:0 6px 18px rgba(255,140,66,0.4); transition:all 0.25s ease; white-space:nowrap;
+        }
+        .btn-add:hover { transform:translateY(-2px) scale(1.04); box-shadow:0 10px 28px rgba(255,140,66,0.5); }
+
+        /* Stats */
+        .stats-row { display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; margin-bottom:2rem; }
+        .stat-pill-card {
+            background:white; border-radius:18px; padding:1rem 1.1rem;
+            display:flex; align-items:center; gap:0.85rem;
+            box-shadow:0 2px 14px rgba(0,0,0,0.06);
+            transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .stat-pill-card:hover { transform:translateY(-4px) scale(1.02); }
+        .stat-icon { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+        .si-slate  { background:linear-gradient(135deg,#F1F5F9,#E2E8F0); }
+        .si-orange { background:linear-gradient(135deg,#FFF3E8,#FFDFBE); }
+        .si-green  { background:linear-gradient(135deg,#ECFDF5,#D1FAE5); }
+        .si-blue   { background:linear-gradient(135deg,#EFF6FF,#DBEAFE); }
+        .si-purple { background:linear-gradient(135deg,#F5F3FF,#EDE9FE); }
+        .stat-num  { font-family:'Fredoka One',cursive; font-size:1.5rem; color:#1e293b; line-height:1; }
+        .stat-lbl  { font-size:0.68rem; color:#94a3b8; font-weight:700; margin-top:1px; }
+
+        /* Toolbar */
+        .toolbar-bar {
+            display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+            gap:1rem; margin-bottom:1.75rem; background:white; border-radius:18px;
+            padding:0.9rem 1.4rem; border:2px solid #f1f5f9; box-shadow:0 2px 12px rgba(0,0,0,0.05);
+        }
+        .toolbar-left { display:flex; align-items:center; gap:0.75rem; }
+        .toolbar-label { font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; }
+        .filter-select {
+            padding:0.5rem 1rem; border-radius:12px; font-size:0.88rem; font-weight:700;
+            border:2px solid #f1f5f9; background:#fafbfc; color:#1e293b;
+            font-family:'Nunito',sans-serif; outline:none; cursor:pointer; transition:border-color 0.2s;
+        }
+        .filter-select:focus { border-color:#FF8C42; }
+        .search-box {
+            display:flex; align-items:center; gap:0.5rem;
+            background:#fafbfc; border:2px solid #f1f5f9; border-radius:12px;
+            padding:0.5rem 1rem; transition:border-color 0.2s;
+        }
+        .search-box:focus-within { border-color:#FF8C42; }
+        .search-box input { border:none; background:transparent; outline:none; font-size:0.88rem; font-family:'Nunito',sans-serif; font-weight:600; color:#1e293b; width:200px; }
+        .search-box input::placeholder { color:#cbd5e1; }
+
+        /* User cards — like dogs.html dog-cards */
+        .user-cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; }
+        .user-card {
+            background:white; border-radius:24px; overflow:hidden;
+            box-shadow:0 4px 20px rgba(0,0,0,0.08);
+            transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.35s ease;
+            animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes popIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+        .user-card:hover { transform:translateY(-10px) scale(1.015); box-shadow:0 24px 50px rgba(0,0,0,0.15); }
+
+        /* Banner — coloured by role, like dog-card-banner */
+        .user-card-banner {
+            height:120px; position:relative; display:flex;
+            align-items:center; justify-content:center; overflow:hidden;
+        }
+        .user-card-banner::before {
+            content:'👤 👤 👤 👤 👤 👤 👤 👤 👤 👤';
+            position:absolute; font-size:1.4rem; opacity:0.10;
+            top:6px; left:-4px; right:-4px; word-break:break-all; line-height:2.3; pointer-events:none;
+        }
+        .banner-admin     { background:linear-gradient(135deg,#F5A623,#FFD166); }
+        .banner-caretaker { background:linear-gradient(135deg,#4CAF82,#7DDDAD); }
+        .banner-doctor    { background:linear-gradient(135deg,#5B9BD5,#90CCF4); }
+        .banner-pet-owner { background:linear-gradient(135deg,#9B7DD4,#C3A9F0); }
+        .banner-default   { background:linear-gradient(135deg,#64748B,#94A3B8); }
+
+        /* Role badge top right */
+        .role-badge-top {
+            position:absolute; top:10px; right:10px;
+            background:rgba(255,255,255,0.92); border-radius:20px;
+            padding:4px 10px; font-size:0.68rem; font-weight:800;
+            backdrop-filter:blur(4px); z-index:5; color:#475569;
+        }
+
+        /* Floating avatar — like dog float avatar */
+        .user-float-avatar {
+            width:80px; height:80px; background:white; border-radius:50%;
+            border:4px solid white; box-shadow:0 8px 24px rgba(0,0,0,0.15);
+            position:absolute; bottom:-40px; left:50%; transform:translateX(-50%);
+            display:flex; align-items:center; justify-content:center;
+            font-family:'Fredoka One',cursive; font-size:1.6rem; color:#334155;
+            z-index:3; transition:transform 0.3s ease;
+        }
+        .user-card:hover .user-float-avatar { transform:translateX(-50%) scale(1.12) rotate(-6deg); }
+
+        /* Card body */
+        .user-card-body { padding:3.2rem 1.3rem 0.8rem; text-align:center; }
+        .user-name { font-family:'Fredoka One',cursive; font-size:1.35rem; color:#1e293b; margin-bottom:2px; }
+        .user-email { font-size:0.78rem; color:#94a3b8; font-weight:600; margin-bottom:1.2rem; }
+        .user-stats { display:grid; grid-template-columns:1fr; gap:0.5rem; margin-bottom:0.8rem; }
+        .stat-pill-sm { background:#f8fafc; border-radius:12px; padding:0.5rem 0.75rem; text-align:left; }
+        .stat-label { font-size:0.6rem; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }
+        .stat-value { font-size:0.88rem; color:#1e293b; font-weight:800; margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+        /* Card footer */
+        .user-card-footer { padding:0 1.2rem 1.2rem; display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; }
+        .cta-btn {
+            padding:0.6rem 0.5rem; border-radius:12px; font-size:0.8rem; font-weight:800;
+            font-family:'Nunito',sans-serif; cursor:pointer; border:none;
+            text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;
+            transition:all 0.2s ease;
+        }
+        .cta-btn:hover { transform:scale(1.05); }
+        .cta-edit   { background:#EFF6FF; color:#2563EB; }
+        .cta-delete { background:#FFF1F2; color:#e11d48; }
+
+        /* Empty state */
+        .empty-state { grid-column:1/-1; text-align:center; padding:5rem 2rem; color:#94a3b8; }
+        .empty-emoji { font-size:3.5rem; display:block; margin-bottom:1rem; animation:float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+        /* Modals */
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(6px); display:none; z-index:1999; align-items:center; justify-content:center; padding:1rem; }
+        .modal-box { background:white; border-radius:24px; padding:2.5rem; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; box-shadow:0 24px 50px rgba(0,0,0,0.18); box-sizing:border-box; animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+        .modal-icon { width:52px; height:52px; background:linear-gradient(135deg,#FF8C42,#F5A623); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin-bottom:0.8rem; box-shadow:0 4px 12px rgba(255,140,66,0.35); }
+        .modal-box h2 { font-family:'Fredoka One',cursive; font-size:1.4rem; color:#1e293b; margin-bottom:4px; }
+        .modal-box .sub { color:#94a3b8; font-size:0.85rem; font-weight:600; margin-bottom:1.8rem; }
+        .field { margin-bottom:1.1rem; }
+        .field label { display:block; font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.35rem; }
+        .form-input { width:100%; padding:0.7rem 1rem; border:2px solid #f1f5f9; border-radius:12px; font-size:0.9rem; font-family:'Nunito',sans-serif; font-weight:600; color:#1e293b; background:#fafbfc; transition:border-color 0.2s; box-sizing:border-box; }
+        .form-input:focus { outline:none; border-color:#FF8C42; box-shadow:0 0 0 4px rgba(255,140,66,0.12); background:white; }
+        .modal-actions { display:flex; gap:1rem; margin-top:1.8rem; }
+        .modal-confirm { flex:1; padding:0.85rem; background:linear-gradient(135deg,#FF8C42,#F5A623); color:white; border:none; border-radius:14px; font-size:0.92rem; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; box-shadow:0 6px 16px rgba(255,140,66,0.4); transition:all 0.25s ease; }
+        .modal-confirm:hover { transform:translateY(-2px) scale(1.02); }
+        .modal-cancel { flex:1; padding:0.85rem; background:#f1f5f9; color:#64748b; border:none; border-radius:14px; font-size:0.92rem; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; transition:all 0.2s ease; }
+        .modal-cancel:hover { background:#e2e8f0; }
+        .toggle-row { display:flex; align-items:center; gap:0.5rem; }
+        @media(max-width:1100px){ .stats-row{grid-template-columns:repeat(3,1fr);} }
+        @media(max-width:768px){ .stats-row{grid-template-columns:1fr 1fr;} .user-cards-grid{grid-template-columns:1fr;} .modal-actions{flex-direction:column;} }
+        @media(max-width:480px){ .stats-row{grid-template-columns:1fr;} }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <main class="main-content-premium">
+        <div id="userNotice" class="notice"></div>
+
+        <div class="page-header">
+            <div class="page-header-left">
+                <h1 class="text-gradient">User Management 👥</h1>
+                <p>Manage staff and pet owner accounts.</p>
+            </div>
+            <button id="addUserBtn" class="btn-add">+ Add New User</button>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-pill-card"><div class="stat-icon si-slate">👥</div><div><div class="stat-num" id="statAll">—</div><div class="stat-lbl">Total Users</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon si-orange">🛡️</div><div><div class="stat-num" id="statAdmin">—</div><div class="stat-lbl">Admins</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon si-green">🐾</div><div><div class="stat-num" id="statCaretaker">—</div><div class="stat-lbl">Caretakers</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon si-blue">🩺</div><div><div class="stat-num" id="statDoctor">—</div><div class="stat-lbl">Doctors</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon si-purple">🏠</div><div><div class="stat-num" id="statOwner">—</div><div class="stat-lbl">Pet Owners</div></div></div>
+        </div>
+
+        <div class="toolbar-bar">
+            <div class="toolbar-left">
+                <span class="toolbar-label">Filter Role:</span>
+                <select id="roleFilter" class="filter-select">
+                    <option value="">All Roles</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="CARETAKER">Caretaker</option>
+                    <option value="DOCTOR">Doctor</option>
+                    <option value="PET_OWNER">Pet Owner</option>
+                </select>
+            </div>
+            <div class="search-box">🔍 <input type="text" id="userSearch" placeholder="Search by name or email…"></div>
+        </div>
+
+        <div class="user-cards-grid" id="userCardsGrid">
+            <div class="empty-state"><span class="empty-emoji">⏳</span><p style="font-weight:700">Loading users…</p></div>
+        </div>
+        <table style="display:none"><tbody id="userList"></tbody></table>
+    </main>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal-overlay" id="addUserModal">
+    <div class="modal-box">
+        <div class="modal-icon">➕</div>
+        <h2>Add New User</h2>
+        <p class="sub">Create an account for a new team member or owner.</p>
+        <form id="addUserForm">
+            <div class="field"><label>Full Name</label><input type="text" id="userName" class="form-input" required placeholder="e.g. Sarah Fernando"></div>
+            <div class="field"><label>Email</label><input type="email" id="userEmail" class="form-input" required placeholder="sarah@pawcare.lk"></div>
+            <div class="field"><label>Phone</label><input type="tel" id="userPhone" class="form-input" required placeholder="+94 77 123 4567"></div>
+            <div class="field"><label>Role</label>
+                <select id="userRole" class="form-input" required>
+                    <option value="CARETAKER">🐾 Caretaker</option>
+                    <option value="DOCTOR">🩺 Doctor</option>
+                    <option value="ADMIN">🛡️ Admin</option>
+                </select>
+            </div>
+            <div class="field"><label>Temporary Password</label><input type="password" id="userPassword" class="form-input" required></div>
+            <div class="modal-actions">
+                <button type="submit" class="modal-confirm">🐾 Create User</button>
+                <button type="button" id="closeModalBtn" class="modal-cancel">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal-overlay" id="editUserModal">
+    <div class="modal-box">
+        <div class="modal-icon" style="background:linear-gradient(135deg,#5B9BD5,#90CCF4);">✏️</div>
+        <h2>Edit User</h2>
+        <p class="sub">Update account details and permissions.</p>
+        <form id="editUserForm">
+            <input type="hidden" id="editUserId">
+            <div class="field"><label>Full Name</label><input type="text" id="editUserName" class="form-input" required></div>
+            <div class="field"><label>Email</label><input type="email" id="editUserEmail" class="form-input" required></div>
+            <div class="field"><label>Phone</label><input type="tel" id="editUserPhone" class="form-input" required></div>
+            <div class="field"><label>Role</label>
+                <select id="editUserRole" class="form-input" required>
+                    <option value="PET_OWNER">🏠 Pet Owner</option>
+                    <option value="CARETAKER">🐾 Caretaker</option>
+                    <option value="DOCTOR">🩺 Doctor</option>
+                    <option value="ADMIN">🛡️ Admin</option>
+                </select>
+            </div>
+            <div class="field"><label>New Password <span style="color:#94a3b8;font-weight:600;">(blank = keep same)</span></label><input type="password" id="editUserPassword" class="form-input"></div>
+            <div class="field"><div class="toggle-row"><input type="checkbox" id="editUserActive"><label for="editUserActive" style="margin:0;color:#1e293b;font-weight:700;">Account Active</label></div></div>
+            <div class="modal-actions">
+                <button type="submit" class="modal-confirm">💾 Save Changes</button>
+                <button type="button" id="closeEditModalBtn" class="modal-cancel">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="../../../lib/jquery-3.7.1.min.js"></script>
+<script src="../../js/auth.js"></script>
+<script src="../../js/layout.js"></script>
+<script>
+    $(document).ready(function () {
+        DogDaycareLayout.init();
+        const session = DogDaycareAuth.getSession();
+        if (!session) { window.location.href = DogDaycareLayout.relPath + 'login.html'; return; }
+
+        const curr = location.pathname.split('/').pop();
+        $('a').each(function(){ if($(this).attr('href')&&$(this).attr('href').split('/').pop().split('?')[0]===curr) $(this).addClass('active-page'); });
+        const $navbar = $('.navbar-premium');
+        if ($navbar.length) { $navbar.find('.navbar-page-accent').remove(); $navbar.append('<span class="navbar-page-accent">👥 User Management</span>'); }
+
+        let usersCache = [];
+
+        function showNotice(type, message) {
+            $('#userNotice').removeClass('notice-success notice-error').addClass(type==='success'?'notice-success':'notice-error').text(message).fadeIn();
+            setTimeout(() => $('#userNotice').fadeOut(), 3000);
+        }
+        function getErrorMessage(xhr, fallback) {
+            if (xhr && xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.error)) return xhr.responseJSON.message || xhr.responseJSON.error;
+            return fallback;
+        }
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return '';
+            return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+        function getInitials(name) {
+            if (!name) return '?';
+            return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        }
+        function getRoleClass(role) { return 'role-' + role.toLowerCase().replace('_', '-'); }
+
+        function updateStats(users) {
+            $('#statAll').text(users.length);
+            $('#statAdmin').text(users.filter(u => u.role === 'ADMIN').length);
+            $('#statCaretaker').text(users.filter(u => u.role === 'CARETAKER').length);
+            $('#statDoctor').text(users.filter(u => u.role === 'DOCTOR').length);
+            $('#statOwner').text(users.filter(u => u.role === 'PET_OWNER').length);
+        }
+
+        function roleTopClass(role) { const m={ADMIN:'top-admin',CARETAKER:'top-caretaker',DOCTOR:'top-doctor',PET_OWNER:'top-pet-owner'}; return m[role]||'top-default'; }
+        function roleIcon(role) { const m={ADMIN:'🛡️',CARETAKER:'🐾',DOCTOR:'🩺',PET_OWNER:'🏠'}; return m[role]||'👤'; }
+        function bannerClass(role) { const m={ADMIN:'banner-admin',CARETAKER:'banner-caretaker',DOCTOR:'banner-doctor',PET_OWNER:'banner-pet-owner'}; return m[role]||'banner-default'; }
+
+        function renderUsers(users) {
+            const $grid = $('#userCardsGrid'); $grid.empty();
+            if (!users.length) {
+                $grid.html('<div class="empty-state"><span class="empty-emoji">👥</span><p style="font-weight:700">No users found.</p></div>'); return;
+            }
+            users.forEach((user,i) => {
+                const initials = getInitials(user.name);
+                $grid.append(`
+                <div class="user-card" style="animation-delay:${i*0.07}s">
+                    <div class="user-card-banner ${bannerClass(user.role)}">
+                        <div class="role-badge-top">${roleIcon(user.role)} ${escapeHtml(user.role)}</div>
+                        <div class="user-float-avatar">${initials}</div>
+                    </div>
+                    <div class="user-card-body">
+                        <div class="user-name">${escapeHtml(user.name)}</div>
+                        <div class="user-email">${escapeHtml(user.email)}</div>
+                        <div class="user-stats">
+                            <div class="stat-pill-sm">
+                                <div class="stat-label">📱 Phone</div>
+                                <div class="stat-value">${escapeHtml(user.phone)||'—'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-card-footer">
+                        <button class="cta-btn cta-edit edit-user-btn" data-id="${user.id}">✏️ Edit</button>
+                        <button class="cta-btn cta-delete delete-user-btn" data-id="${user.id}">🗑️ Remove</button>
+                    </div>
+                </div>`);
+            });
+        }
+
+        function loadUsers(role = '') {
+            $('#userCardsGrid').html('<div class="empty-state"><span class="empty-emoji" style="animation:none">⏳</span><p style="font-weight:700">Loading users…</p></div>');
+            DogDaycareAuth.getUsers(role).then(users => {
+                usersCache = users || [];
+                if (!role) updateStats(usersCache);
+                renderUsers(usersCache);
+            }).fail(xhr => {
+                $('#userCardsGrid').html('<div class="empty-state" style="color:#e11d48">⚠️ Failed to load users.</div>');
+                showNotice('error', getErrorMessage(xhr, 'Failed to load users'));
+            });
+        }
+
+        loadUsers();
+        $('#roleFilter').on('change', function () { loadUsers($(this).val()); });
+        $('#userSearch').on('input', function () {
+            const q = $(this).val().toLowerCase();
+            renderUsers(usersCache.filter(u => (u.name||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q)));
+        });
+
+        // Modals
+        $('#addUserBtn').on('click', () => $('#addUserModal').css('display', 'flex').hide().fadeIn());
+        $('#closeModalBtn').on('click', () => $('#addUserModal').fadeOut());
+        $('#closeEditModalBtn').on('click', () => $('#editUserModal').fadeOut());
+        $('#addUserModal').on('click', function (e) { if (e.target === this) $(this).fadeOut(); });
+        $('#editUserModal').on('click', function (e) { if (e.target === this) $(this).fadeOut(); });
+
+        $('#addUserForm').on('submit', function (e) {
+            e.preventDefault();
+            const payload = { name:$('#userName').val(), email:$('#userEmail').val(), phone:$('#userPhone').val(), role:$('#userRole').val(), password:$('#userPassword').val() };
+            DogDaycareAuth.createUser(payload).then(() => {
+                showNotice('success', 'User created successfully!');
+                $('#addUserModal').fadeOut(); $('#addUserForm')[0].reset(); loadUsers();
+            }).fail(xhr => { showNotice('error', getErrorMessage(xhr, 'Failed to create user')); });
+        });
+
+        $('#userCardsGrid').on('click', '.edit-user-btn', function () {
+            const userId = Number($(this).data('id'));
+            const user = usersCache.find(u => Number(u.id) === userId);
+            if (!user) return;
+            $('#editUserId').val(user.id); $('#editUserName').val(user.name||'');
+            $('#editUserEmail').val(user.email||''); $('#editUserPhone').val(user.phone||'');
+            $('#editUserRole').val(user.role||'PET_OWNER'); $('#editUserPassword').val('');
+            $('#editUserActive').prop('checked', Boolean(user.active));
+            $('#editUserModal').css('display', 'flex').hide().fadeIn();
+        });
+
+        $('#editUserForm').on('submit', function (e) {
+            e.preventDefault();
+            const userId = Number($('#editUserId').val());
+            const payload = { name:$('#editUserName').val(), email:$('#editUserEmail').val(), phone:$('#editUserPhone').val(), role:$('#editUserRole').val(), active:$('#editUserActive').is(':checked') };
+            const password = $('#editUserPassword').val();
+            if (password) payload.password = password;
+            DogDaycareAuth.updateUser(userId, payload).then(() => {
+                showNotice('success', 'User updated successfully!');
+                $('#editUserModal').fadeOut(); loadUsers($('#roleFilter').val());
+            }).fail(xhr => { showNotice('error', getErrorMessage(xhr, 'Failed to update user')); });
+        });
+
+        $('#userCardsGrid').on('click', '.delete-user-btn', function () {
+            const userId = Number($(this).data('id'));
+            const user = usersCache.find(u => Number(u.id) === userId);
+            const label = user ? (user.name+' ('+user.email+')') : ('user #'+userId);
+            if (!window.confirm('Delete '+label+'? This action cannot be undone.')) return;
+            DogDaycareAuth.deleteUser(userId).then(() => {
+                showNotice('success', 'User deleted successfully!');
+                loadUsers($('#roleFilter').val());
+            }).fail(xhr => { showNotice('error', getErrorMessage(xhr, 'Failed to delete user')); });
+        });
+
+        $(document).on('keydown', e => { if (e.key === 'Escape') { $('#addUserModal').fadeOut(); $('#editUserModal').fadeOut(); } });
+    });
+</script>
+</body>
+</html>

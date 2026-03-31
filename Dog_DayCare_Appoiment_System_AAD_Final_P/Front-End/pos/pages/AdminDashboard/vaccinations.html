@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaccinations | PawCare</title>
+    <link rel="stylesheet" href="../../../css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        a.active-page, button.active-page {
+            background: linear-gradient(135deg, #FF8C42, #F5A623) !important;
+            color: white !important; border-radius: 12px !important;
+            box-shadow: 0 4px 15px rgba(255,140,66,0.45) !important;
+        }
+        .navbar-premium {
+            background: linear-gradient(135deg, rgba(245,243,255,0.97), rgba(233,213,255,0.97)) !important;
+            border-bottom: 2px solid rgba(139,92,246,0.2) !important;
+        }
+        .navbar-page-accent {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-size: 0.78rem; font-weight: 800; color: #5B21B6;
+            background: rgba(139,92,246,0.12);
+            padding: 0.28rem 0.85rem; border-radius: 99px;
+            font-family: 'Nunito', sans-serif;
+        }
+        .page-header { margin-bottom: 2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+        .page-header-left h1 { font-family:'Fredoka One',cursive; font-size:2rem; color:#1e293b; margin-bottom:4px; }
+        .page-header-left p { color:#94a3b8; font-weight:600; font-size:0.9rem; }
+        .btn-add {
+            background:linear-gradient(135deg,#9B7DD4,#C3A9F0); color:white;
+            border:none; border-radius:16px; padding:0.75rem 1.5rem;
+            font-size:0.88rem; font-weight:800; font-family:'Nunito',sans-serif;
+            cursor:pointer; display:flex; align-items:center; gap:0.5rem;
+            box-shadow:0 6px 18px rgba(155,125,212,0.4); transition:all 0.25s ease; white-space:nowrap;
+        }
+        .btn-add:hover { transform:translateY(-2px) scale(1.04); box-shadow:0 10px 28px rgba(155,125,212,0.5); }
+
+        /* Stats row */
+        .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:2rem; display:none; }
+        .stats-row.visible { display:grid; }
+        .stat-pill-card {
+            background:white; border-radius:18px; padding:1.1rem 1.3rem;
+            display:flex; align-items:center; gap:0.9rem;
+            box-shadow:0 2px 14px rgba(0,0,0,0.06);
+            transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .stat-pill-card:hover { transform:translateY(-4px) scale(1.02); }
+        .stat-icon { width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.35rem; flex-shrink:0; }
+        .si-purple { background:linear-gradient(135deg,#F5F3FF,#EDE9FE); }
+        .si-green  { background:linear-gradient(135deg,#ECFDF5,#D1FAE5); }
+        .si-red    { background:linear-gradient(135deg,#FFF1F2,#FFE4E6); }
+        .stat-num  { font-family:'Fredoka One',cursive; font-size:1.65rem; color:#1e293b; line-height:1; }
+        .stat-lbl  { font-size:0.72rem; color:#94a3b8; font-weight:700; margin-top:1px; }
+
+        /* Search toolbar */
+        .search-toolbar {
+            display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;
+            margin-bottom:1.75rem; background:white; border-radius:18px;
+            padding:1rem 1.5rem; border:2px solid #f1f5f9;
+            box-shadow:0 2px 12px rgba(0,0,0,0.05);
+        }
+        .search-toolbar label { font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; }
+        .dog-search-wrap {
+            display:flex; align-items:center; gap:0.5rem;
+            background:#f8fafc; border:2px solid #f1f5f9; border-radius:12px;
+            padding:0.5rem 0.9rem; flex:1; min-width:200px; transition:border-color 0.2s;
+        }
+        .dog-search-wrap:focus-within { border-color:#9B7DD4; }
+        .dog-search-wrap input { border:none; background:transparent; outline:none; font-size:0.88rem; font-family:'Nunito',sans-serif; font-weight:600; color:#1e293b; width:100%; }
+        .btn-search {
+            padding:0.55rem 1.3rem; border-radius:12px; font-size:0.82rem; font-weight:800;
+            cursor:pointer; border:none; font-family:'Nunito',sans-serif;
+            background:linear-gradient(135deg,#9B7DD4,#C3A9F0); color:white;
+            box-shadow:0 4px 10px rgba(155,125,212,0.35); transition:all 0.22s ease;
+        }
+        .btn-search:hover { transform:scale(1.04); }
+
+        .section-title { font-family:'Fredoka One',cursive; font-size:1.35rem; color:#1e293b; margin-bottom:1.5rem; }
+
+        /* Vac cards */
+        .vac-cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; }
+        .vac-card {
+            background:white; border-radius:22px; overflow:hidden;
+            box-shadow:0 3px 16px rgba(0,0,0,0.07);
+            transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s ease;
+            animation:slideUp 0.35s ease both;
+        }
+        @keyframes slideUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+        .vac-card:hover { transform:translateY(-8px) scale(1.01); box-shadow:0 20px 44px rgba(0,0,0,0.13); }
+        .card-banner {
+            height:90px; position:relative; overflow:hidden;
+            display:flex; align-items:flex-start; justify-content:space-between; padding:0.85rem 1.1rem;
+        }
+        .card-banner::before {
+            content:'💉 💊 💉 💊 💉 💊 💉 💊';
+            position:absolute; font-size:1.2rem; opacity:0.10;
+            top:4px; left:0; right:0; word-break:break-all; line-height:2.2; pointer-events:none;
+        }
+        .card-banner::after { content:attr(data-bg-icon); position:absolute; right:0.8rem; bottom:-0.6rem; font-size:3.8rem; opacity:0.15; pointer-events:none; }
+        .banner-active  { background:linear-gradient(135deg,#9B7DD4,#C3A9F0); }
+        .banner-expired { background:linear-gradient(135deg,#F06B8A,#FF9DB5); }
+        .status-pill {
+            display:inline-flex; align-items:center; gap:4px;
+            background:rgba(255,255,255,0.25); color:white;
+            border:1px solid rgba(255,255,255,0.35);
+            padding:0.25rem 0.7rem; border-radius:20px;
+            font-size:0.67rem; font-weight:800; font-family:'Nunito',sans-serif; backdrop-filter:blur(4px);
+        }
+        .status-pill::before { content:'●'; font-size:0.4rem; }
+        .card-float-avatar {
+            width:52px; height:52px; background:white; border-radius:50%;
+            border:3px solid white; box-shadow:0 4px 14px rgba(0,0,0,0.14);
+            position:absolute; bottom:-26px; left:1.3rem;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.6rem; z-index:3; transition:transform 0.3s ease;
+        }
+        .vac-card:hover .card-float-avatar { transform:scale(1.15) rotate(-8deg); }
+        .card-body { padding:2rem 1.3rem 1rem; }
+        .card-dog-name { font-family:'Fredoka One',cursive; font-size:1.1rem; color:#1e293b; margin-bottom:0.75rem; }
+        .vac-name-chip {
+            display:inline-flex; align-items:center; gap:5px;
+            background:#F5F3FF; color:#5B21B6; border:1px solid #DDD6FE;
+            padding:0.3rem 0.75rem; border-radius:10px;
+            font-size:0.82rem; font-weight:800; margin-bottom:1rem;
+        }
+        .card-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; }
+        .info-pill { border-radius:12px; padding:0.55rem 0.75rem; }
+        .info-pill-normal { background:#f8fafc; }
+        .info-pill-expired { background:#FFF1F2; }
+        .info-lbl { font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }
+        .info-lbl-normal { color:#94a3b8; }
+        .info-lbl-expired { color:#e11d48; }
+        .info-val { font-size:0.88rem; color:#1e293b; font-weight:800; margin-top:2px; }
+        .info-val-expired { color:#e11d48; }
+
+        /* Empty state */
+        .empty-state { grid-column:1/-1; text-align:center; padding:5rem 2rem; color:#94a3b8; }
+        .empty-emoji { font-size:3.5rem; display:block; margin-bottom:1rem; animation:float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+        /* Modal */
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(6px); display:none; z-index:1999; align-items:center; justify-content:center; padding:1rem; }
+        .modal-box { background:white; border-radius:24px; padding:2.5rem; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; box-shadow:0 24px 50px rgba(0,0,0,0.18); animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes popIn { from{opacity:0;transform:scale(0.88)} to{opacity:1;transform:scale(1)} }
+        .modal-icon { width:52px; height:52px; background:linear-gradient(135deg,#9B7DD4,#C3A9F0); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin-bottom:0.8rem; box-shadow:0 4px 12px rgba(155,125,212,0.35); }
+        .modal-box h2 { font-family:'Fredoka One',cursive; font-size:1.4rem; color:#1e293b; margin-bottom:4px; }
+        .modal-box .sub { color:#94a3b8; font-size:0.85rem; font-weight:600; margin-bottom:1.8rem; }
+        .field { margin-bottom:1.1rem; }
+        .field label { display:block; font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.35rem; }
+        .form-input { width:100%; padding:0.7rem 1rem; border:2px solid #f1f5f9; border-radius:12px; font-size:0.9rem; font-family:'Nunito',sans-serif; font-weight:600; color:#1e293b; background:#fafbfc; transition:border-color 0.2s,box-shadow 0.2s; box-sizing:border-box; }
+        .form-input:focus { outline:none; border-color:#9B7DD4; box-shadow:0 0 0 4px rgba(155,125,212,0.15); background:white; }
+        .modal-actions { display:flex; gap:1rem; margin-top:1.8rem; }
+        .modal-confirm { flex:1; padding:0.85rem; background:linear-gradient(135deg,#9B7DD4,#C3A9F0); color:white; border:none; border-radius:14px; font-size:0.92rem; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; box-shadow:0 6px 16px rgba(155,125,212,0.4); transition:all 0.25s ease; }
+        .modal-confirm:hover { transform:translateY(-2px) scale(1.02); }
+        .modal-cancel { flex:1; padding:0.85rem; background:#f1f5f9; color:#64748b; border:none; border-radius:14px; font-size:0.92rem; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; transition:all 0.2s ease; }
+        .modal-cancel:hover { background:#e2e8f0; }
+        @media(max-width:768px){ .vac-cards-grid{grid-template-columns:1fr;} .stats-row.visible{grid-template-columns:1fr;} }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <main class="main-content-premium">
+        <div id="vaccinationNotice" class="notice"></div>
+        <div class="page-header">
+            <div class="page-header-left">
+                <h1 class="text-gradient">Vaccination Records 💉</h1>
+                <p>Monitor and update health safety records.</p>
+            </div>
+            <button id="addVacBtn" class="btn-add">💉 Add Vaccination</button>
+        </div>
+
+        <div class="stats-row" id="vacStats">
+            <div class="stat-pill-card"><div class="stat-icon si-purple">💉</div><div><div class="stat-num" id="statTotal">—</div><div class="stat-lbl">Total Records</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon si-green">✅</div><div><div class="stat-num" id="statActive">—</div><div class="stat-lbl">Active</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon si-red">⚠️</div><div><div class="stat-num" id="statExpired">—</div><div class="stat-lbl">Expired</div></div></div>
+        </div>
+
+        <div class="search-toolbar">
+            <label>🐾 Search Dog:</label>
+            <div class="dog-search-wrap">
+                <input type="text" id="dogSearchInput" list="dogDatalist" placeholder="Search by name or ID…">
+                <datalist id="dogDatalist"></datalist>
+            </div>
+            <button id="searchBtn" class="btn-search">View Records</button>
+        </div>
+
+        <div class="section-title" id="vacListTitle">Vaccination History</div>
+
+        <div class="vac-cards-grid" id="vacCardsGrid">
+            <div class="empty-state"><span class="empty-emoji">💉</span><p style="font-weight:700">Enter a Dog name or ID to view records.</p></div>
+        </div>
+        <table style="display:none"><tbody id="vacList"></tbody></table>
+    </main>
+</div>
+
+<!-- Add Vaccination Modal -->
+<div class="modal-overlay" id="addVacModal">
+    <div class="modal-box">
+        <div class="modal-icon">💉</div>
+        <h2>Record Vaccination</h2>
+        <p class="sub">Keep your pet's health records up to date!</p>
+        <form id="addVacForm">
+            <div class="field">
+                <label>Select Dog</label>
+                <select id="vacDogSelect" class="form-input" required>
+                    <option value="">Choose a dog…</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Vaccine Name</label>
+                <input type="text" id="vacName" class="form-input" required placeholder="e.g. Rabies, DHPP">
+            </div>
+            <div class="field">
+                <label>Date Given</label>
+                <input type="date" id="vacGiven" class="form-input" required>
+            </div>
+            <div class="field">
+                <label>Expiry Date</label>
+                <input type="date" id="vacExpiry" class="form-input" required>
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="modal-confirm">💉 Save Record</button>
+                <button type="button" id="closeModalBtn" class="modal-cancel">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="../../../lib/jquery-3.7.1.min.js"></script>
+<script src="../../js/auth.js"></script>
+<script src="../../js/layout.js"></script>
+<script>
+    $(document).ready(function () {
+        DogDaycareLayout.init();
+        const session = DogDaycareAuth.getSession();
+        if (!session) { window.location.href = DogDaycareLayout.relPath + 'login.html'; return; }
+
+        const curr = location.pathname.split('/').pop();
+        $('a').each(function(){ if($(this).attr('href')&&$(this).attr('href').split('/').pop().split('?')[0]===curr) $(this).addClass('active-page'); });
+        const $navbar = $('.navbar-premium');
+        if ($navbar.length) { $navbar.find('.navbar-page-accent').remove(); $navbar.append('<span class="navbar-page-accent">💉 Vaccinations</span>'); }
+
+        let dogCache = {};
+        const DOG_ICONS = ['🐶','🐕','🦮','🐩','🐾','🐕‍🦺'];
+        function dogIcon(id) { return DOG_ICONS[(id||0) % DOG_ICONS.length]; }
+
+        function loadDogs() {
+            DogDaycareAuth.request('GET', '/api/v1/dogs').then(dogs => {
+                const $select = $('#vacDogSelect');
+                const $datalist = $('#dogDatalist');
+                $select.find('option:not(:first)').remove();
+                $datalist.empty();
+                dogs.forEach(dog => {
+                    dogCache[dog.id] = dog.name;
+                    $select.append(`<option value="${dog.id}">${dog.name} (ID: ${dog.id})</option>`);
+                    $datalist.append(`<option value="${dog.name}" data-id="${dog.id}">ID: ${dog.id}</option>`);
+                });
+            });
+        }
+
+        function renderVacCards(vacs, dogId) {
+            const $grid = $('#vacCardsGrid'); $grid.empty();
+            if (!vacs.length) { $grid.html('<div class="empty-state"><span class="empty-emoji">💉</span><p style="font-weight:700">No records found for this dog.</p></div>'); return; }
+            const dogName = dogCache[dogId] || `Dog #${dogId}`;
+            const expiredCount = vacs.filter(v => new Date(v.expiryDate) < new Date()).length;
+            $('#vacListTitle').text(`${dogName}'s Vaccinations (${vacs.length})`);
+            $('#statTotal').text(vacs.length);
+            $('#statActive').text(vacs.length - expiredCount);
+            $('#statExpired').text(expiredCount);
+            $('#vacStats').addClass('visible');
+            vacs.sort((a, b) => new Date(b.givenDate) - new Date(a.givenDate));
+            vacs.forEach((v,i) => {
+                const isExpired = new Date(v.expiryDate) < new Date();
+                const icon = dogIcon(dogId);
+                $grid.append(`
+                <div class="vac-card" style="animation-delay:${i*0.07}s">
+                    <div class="card-banner ${isExpired?'banner-expired':'banner-active'}" data-bg-icon="${isExpired?'⚠️':'💉'}">
+                        <span class="status-pill">${isExpired?'⚠️ Expired':'✅ Active'}</span>
+                    </div>
+                    <div class="card-float-avatar">${icon}</div>
+                    <div class="card-body">
+                        <div class="card-dog-name">${dogName}</div>
+                        <div class="vac-name-chip">💊 ${v.vaccineName}</div>
+                        <div class="card-info-grid">
+                            <div class="info-pill info-pill-normal">
+                                <div class="info-lbl info-lbl-normal">📅 Given</div>
+                                <div class="info-val">${v.givenDate}</div>
+                            </div>
+                            <div class="info-pill ${isExpired?'info-pill-expired':'info-pill-normal'}">
+                                <div class="info-lbl ${isExpired?'info-lbl-expired':'info-lbl-normal'}">${isExpired?'⚠️ Expired':'✅ Expiry'}</div>
+                                <div class="info-val ${isExpired?'info-val-expired':''}">${v.expiryDate}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`);
+            });
+        }
+
+        function loadVaccinations(dogId) {
+            if (!dogId) return;
+            $('#vacCardsGrid').html('<div class="empty-state"><span class="empty-emoji" style="animation:none">⏳</span><p style="font-weight:700">Loading…</p></div>');
+            DogDaycareAuth.getVaccinationsByDog(dogId).then(vacs => { renderVacCards(vacs, dogId); });
+        }
+
+        loadDogs();
+
+        $('#searchBtn').on('click', function () {
+            const searchValue = $('#dogSearchInput').val();
+            const $opt = $(`#dogDatalist option[value="${searchValue}"]`);
+            let dogId = $opt.length ? $opt.data('id') : null;
+            if (!dogId && !isNaN(searchValue)) dogId = Number(searchValue);
+            if (dogId) { loadVaccinations(dogId); }
+            else { alert('Please select a valid dog from the list.'); }
+        });
+
+        $('#addVacBtn').on('click', () => $('#addVacModal').css('display', 'flex').hide().fadeIn());
+        $('#closeModalBtn').on('click', () => $('#addVacModal').fadeOut());
+
+        $('#addVacForm').on('submit', function (e) {
+            e.preventDefault();
+            const payload = {
+                dogId: Number($('#vacDogSelect').val()),
+                vaccineName: $('#vacName').val(),
+                givenDate: $('#vacGiven').val(),
+                expiryDate: $('#vacExpiry').val()
+            };
+            DogDaycareAuth.createVaccination(payload).then(() => {
+                $('#vaccinationNotice').text('Vaccination record saved!').removeClass('notice-error').addClass('notice-success').fadeIn();
+                $('#addVacModal').fadeOut();
+                $('#addVacForm')[0].reset();
+                loadVaccinations(payload.dogId);
+                setTimeout(() => $('#vaccinationNotice').fadeOut(), 3000);
+            }).fail(xhr => {
+                const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Failed to save vaccination';
+                $('#vaccinationNotice').text(msg).removeClass('notice-success').addClass('notice-error').fadeIn();
+            });
+        });
+
+        $(document).on('keydown', e => { if (e.key === 'Escape') $('#addVacModal').fadeOut(); });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | PawCare</title>
+    <link rel="stylesheet" href="../../css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            margin: 0;
+            background: #f5f0ea;
+        }
+
+        /* Left panel */
+        .left-panel {
+            width: 400px;
+            flex-shrink: 0;
+            background: linear-gradient(160deg, #3d1f0a 0%, #7c3d0a 60%, #b45309 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 3rem 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 260px; height: 260px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 50%;
+        }
+
+        .lp-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .lp-logo-icon {
+            width: 72px; height: 72px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 22px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .lp-logo-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .lp-logo-sub {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .lp-middle {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .lp-big-emoji {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 1.25rem;
+        }
+
+        .lp-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.75rem;
+            line-height: 1.25;
+        }
+
+        .lp-desc {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.65);
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        .lp-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .lp-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+        }
+
+        .step-num {
+            width: 32px; height: 32px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .step-text { font-size: 0.85rem; font-weight: 700; }
+
+        /* Right panel */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 2rem;
+            overflow-y: auto;
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .form-top {
+            margin-bottom: 2rem;
+        }
+
+        .form-top-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #f97316;
+            margin-bottom: 8px;
+        }
+
+        .form-top h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 6px;
+        }
+
+        .form-top p { font-size: 0.88rem; color: #94a3b8; font-weight: 600; margin: 0; }
+
+        .field { margin-bottom: 1rem; }
+        .field label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #64748b;
+            margin-bottom: 7px;
+        }
+
+        .field-wrap { position: relative; }
+
+        .field-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+            background: white;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .field input:focus {
+            outline: none;
+            border-color: #f97316;
+            box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #f97316, #f59e0b);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 0.9rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(249,115,22,0.35);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(249,115,22,0.45); }
+
+        .form-footer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .form-footer a { color: #f97316; font-weight: 800; text-decoration: none; }
+        .form-footer a:hover { text-decoration: underline; }
+
+        .notice {
+            display: none;
+            padding: 0.875rem 1.25rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            text-align: center;
+        }
+        .notice-success { display: block; background: #ecfdf5; color: #047857; }
+        .notice-error { display: block; background: #fef2f2; color: #b91c1c; }
+
+        @media (max-width: 768px) {
+            .left-panel { display: none; }
+        }
+    </style>
+</head>
+<body data-page="register">
+
+<!-- Left panel -->
+<div class="left-panel">
+    <div class="lp-logo">
+        <div class="lp-logo-icon">🐾</div>
+        <div class="lp-logo-name">PawCare</div>
+        <div class="lp-logo-sub">Daycare Management</div>
+    </div>
+
+    <div class="lp-middle">
+        <span class="lp-big-emoji">🐶</span>
+        <div class="lp-title">Join the PawCare Family</div>
+        <div class="lp-desc">Create your account and start giving your furry friend the premium care they deserve.</div>
+    </div>
+
+    <div class="lp-steps">
+        <div class="lp-step">
+            <div class="step-num">1</div>
+            <div class="step-text">Create your pet owner account</div>
+        </div>
+        <div class="lp-step">
+            <div class="step-num">2</div>
+            <div class="step-text">Register your dog's profile</div>
+        </div>
+        <div class="lp-step">
+            <div class="step-num">3</div>
+            <div class="step-text">Book daycare & track health</div>
+        </div>
+    </div>
+</div>
+
+<!-- Right form panel -->
+<div class="right-panel">
+    <div class="form-card">
+        <div class="form-top">
+            <div class="form-top-tag">NEW MEMBER</div>
+            <h2>Join the Family 🐾</h2>
+            <p>Create your pet owner account to get started</p>
+        </div>
+
+        <form id="registerForm" novalidate>
+            <div class="field">
+                <label for="name">Full Name</label>
+                <div class="field-wrap">
+                    <span class="field-icon">👤</span>
+                    <input id="name" type="text" placeholder="John Doe" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="email">Email Address</label>
+                <div class="field-wrap">
+                    <span class="field-icon">📧</span>
+                    <input id="email" type="email" placeholder="name@example.com" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="phone">Phone Number</label>
+                <div class="field-wrap">
+                    <span class="field-icon">📱</span>
+                    <input id="phone" type="tel" placeholder="077 123 4567" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <div class="field-wrap">
+                    <span class="field-icon">🔒</span>
+                    <input id="password" type="password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="confirmPassword">Confirm Password</label>
+                <div class="field-wrap">
+                    <span class="field-icon">🔒</span>
+                    <input id="confirmPassword" type="password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button id="registerBtn" class="btn-submit" type="submit">
+                Create Account 🐾
+            </button>
+        </form>
+
+        <div id="registerNotice" class="notice"></div>
+
+        <div class="form-footer">
+            Already have an account? <a href="login.html">Sign in here</a>
+            <br><br>
+            <a href="index.html" style="color:#94a3b8;font-weight:600;">← Back to home</a>
+        </div>
+    </div>
+</div>
+
+<script src="../../lib/jquery-3.7.1.min.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/auth-pages.js"></script>
+</body>
+</html>

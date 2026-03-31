@@ -1,0 +1,540 @@
+{
+  "info": {
+    "name": "Dog Daycare Management System",
+    "description": "Updated for current backend controllers and security rules. Flow: 1) Register/Login owner and admin. 2) Create staff users with admin token. 3) Test domain APIs with correct role token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "ownerToken", "value": "", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "caretakerToken", "value": "", "type": "string" },
+    { "key": "doctorToken", "value": "", "type": "string" },
+    { "key": "ownerId", "value": "1", "type": "string" },
+    { "key": "adminId", "value": "2", "type": "string" },
+    { "key": "caretakerId", "value": "3", "type": "string" },
+    { "key": "doctorId", "value": "4", "type": "string" },
+    { "key": "dogId", "value": "1", "type": "string" },
+    { "key": "appointmentId", "value": "1", "type": "string" },
+    { "key": "doctorAppointmentId", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "00 - Auth",
+      "item": [
+        {
+          "name": "Register - Pet Owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var res = pm.response.json();",
+                  "  pm.collectionVariables.set('token', res.token);",
+                  "  pm.collectionVariables.set('ownerToken', res.token);",
+                  "  pm.collectionVariables.set('ownerId', String(res.userId));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Smith\",\n  \"email\": \"alice@example.com\",\n  \"phone\": \"0771234567\",\n  \"password\": \"Alice@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login - Pet Owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var res = pm.response.json();",
+                  "  pm.collectionVariables.set('token', res.token);",
+                  "  pm.collectionVariables.set('ownerToken', res.token);",
+                  "  pm.collectionVariables.set('ownerId', String(res.userId));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"Alice@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var res = pm.response.json();",
+                  "  pm.collectionVariables.set('token', res.token);",
+                  "  pm.collectionVariables.set('adminToken', res.token);",
+                  "  pm.collectionVariables.set('adminId', String(res.userId));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login - Caretaker",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var res = pm.response.json();",
+                  "  pm.collectionVariables.set('token', res.token);",
+                  "  pm.collectionVariables.set('caretakerToken', res.token);",
+                  "  pm.collectionVariables.set('caretakerId', String(res.userId));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"bob@daycare.com\",\n  \"password\": \"Bob@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login - Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var res = pm.response.json();",
+                  "  pm.collectionVariables.set('token', res.token);",
+                  "  pm.collectionVariables.set('doctorToken', res.token);",
+                  "  pm.collectionVariables.set('doctorId', String(res.userId));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"carol@vetclinic.com\",\n  \"password\": \"Carol@1234\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Users",
+      "item": [
+        {
+          "name": "Create Caretaker (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/users", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Bob Caretaker\",\n  \"email\": \"bob@daycare.com\",\n  \"phone\": \"0700000002\",\n  \"password\": \"Bob@1234\",\n  \"role\": \"CARETAKER\"\n}" }
+          }
+        },
+        {
+          "name": "Create Doctor (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/users", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Dr. Carol Vet\",\n  \"email\": \"carol@vetclinic.com\",\n  \"phone\": \"0700000003\",\n  \"password\": \"Carol@1234\",\n  \"role\": \"DOCTOR\"\n}" }
+          }
+        },
+        {
+          "name": "Get Users by Role - DOCTOR (PUBLIC)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/public/by-role?role=DOCTOR",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "public", "by-role"],
+              "query": [{ "key": "role", "value": "DOCTOR" }]
+            }
+          }
+        },
+        {
+          "name": "Get Users by Role - CARETAKER (PUBLIC)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/public/by-role?role=CARETAKER",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "public", "by-role"],
+              "query": [{ "key": "role", "value": "CARETAKER" }]
+            }
+          }
+        },
+        {
+          "name": "Get All Users (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/users", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Dogs",
+      "item": [
+        {
+          "name": "Register Dog (OWNER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{ownerToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/dogs", "host": ["{{baseUrl}}"], "path": ["api", "v1", "dogs"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Buddy\",\n  \"breed\": \"Golden Retriever\",\n  \"dateOfBirth\": \"2021-06-15\",\n  \"ownerId\": {{ownerId}}\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Dog by ID (PUBLIC)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/dogs/{{dogId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "dogs", "{{dogId}}"] }
+          }
+        },
+        {
+          "name": "Get Dogs by Owner",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ownerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dogs?ownerId={{ownerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "dogs"],
+              "query": [{ "key": "ownerId", "value": "{{ownerId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Update Dog",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{ownerToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/dogs/{{dogId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "dogs", "{{dogId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Buddy Updated\",\n  \"breed\": \"Labrador\",\n  \"dateOfBirth\": \"2021-06-15\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Dog",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ownerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/dogs/{{dogId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "dogs", "{{dogId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Daycare Appointments",
+      "item": [
+        {
+          "name": "Book Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{ownerToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/daycare-appointments", "host": ["{{baseUrl}}"], "path": ["api", "v1", "daycare-appointments"] },
+            "body": { "mode": "raw", "raw": "{\n  \"dogId\": {{dogId}},\n  \"caretakerId\": {{caretakerId}},\n  \"startTime\": \"2026-04-01T09:00:00\",\n  \"endTime\": \"2026-04-01T17:00:00\"\n}" }
+          }
+        },
+        {
+          "name": "Update Daycare Status (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/daycare-appointments/{{appointmentId}}/status", "host": ["{{baseUrl}}"], "path": ["api", "v1", "daycare-appointments", "{{appointmentId}}", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"APPROVED\"\n}" }
+          }
+        },
+        {
+          "name": "Get by Dog",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ownerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/daycare-appointments?dogId={{dogId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "daycare-appointments"],
+              "query": [{ "key": "dogId", "value": "{{dogId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get by Caretaker",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ownerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/daycare-appointments?caretakerId={{caretakerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "daycare-appointments"],
+              "query": [{ "key": "caretakerId", "value": "{{caretakerId}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Vaccinations",
+      "item": [
+        {
+          "name": "Create Vaccination (CARETAKER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{caretakerToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/vaccinations", "host": ["{{baseUrl}}"], "path": ["api", "v1", "vaccinations"] },
+            "body": { "mode": "raw", "raw": "{\n  \"dogId\": {{dogId}},\n  \"vaccineName\": \"Rabies\",\n  \"givenDate\": \"2026-03-01\",\n  \"expiryDate\": \"2026-03-28\"\n}" }
+          }
+        },
+        {
+          "name": "Get Vaccinations by Dog",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ownerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vaccinations?dogId={{dogId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vaccinations"],
+              "query": [{ "key": "dogId", "value": "{{dogId}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Health Reports",
+      "item": [
+        {
+          "name": "Create Health Report (CARETAKER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{caretakerToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/health-reports", "host": ["{{baseUrl}}"], "path": ["api", "v1", "health-reports"] },
+            "body": { "mode": "raw", "raw": "{\n  \"dogId\": {{dogId}},\n  \"createdById\": {{caretakerId}},\n  \"behaviour\": \"ACTIVE\",\n  \"healthStatus\": \"GOOD\",\n  \"notes\": \"Normal\"\n}" }
+          }
+        },
+        {
+          "name": "Get Health Reports by Dog",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ownerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health-reports?dogId={{dogId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "health-reports"],
+              "query": [{ "key": "dogId", "value": "{{dogId}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Doctor Appointments",
+      "item": [
+        {
+          "name": "Create Doctor Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{ownerToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/doctor-appointments", "host": ["{{baseUrl}}"], "path": ["api", "v1", "doctor-appointments"] },
+            "body": { "mode": "raw", "raw": "{\n  \"dogId\": {{dogId}},\n  \"ownerId\": {{ownerId}},\n  \"doctorId\": {{doctorId}},\n  \"appointmentTime\": \"2026-04-02T10:00:00\",\n  \"notes\": \"Follow-up\"\n}" }
+          }
+        },
+        {
+          "name": "Update Doctor Appointment Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/doctor-appointments/{{doctorAppointmentId}}/status", "host": ["{{baseUrl}}"], "path": ["api", "v1", "doctor-appointments", "{{doctorAppointmentId}}", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"CONFIRMED\"\n}" }
+          }
+        },
+        {
+          "name": "Get by Owner",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ownerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor-appointments?ownerId={{ownerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "doctor-appointments"],
+              "query": [{ "key": "ownerId", "value": "{{ownerId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get by Dog",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ownerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor-appointments?dogId={{dogId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "doctor-appointments"],
+              "query": [{ "key": "dogId", "value": "{{dogId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get by Doctor",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{doctorToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctor-appointments?doctorId={{doctorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "doctor-appointments"],
+              "query": [{ "key": "doctorId", "value": "{{doctorId}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Notifications",
+      "item": [
+        {
+          "name": "Get Notifications by Owner",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ownerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/notifications/owner/{{ownerId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "notifications", "owner", "{{ownerId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Error Cases",
+      "item": [
+        {
+          "name": "No Token on Protected Endpoint [401 expected]",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/users", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users"] }
+          }
+        },
+        {
+          "name": "Invalid Role on Public Users [400 expected]",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/public/by-role?role=PET_OWNER",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "public", "by-role"],
+              "query": [{ "key": "role", "value": "PET_OWNER" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

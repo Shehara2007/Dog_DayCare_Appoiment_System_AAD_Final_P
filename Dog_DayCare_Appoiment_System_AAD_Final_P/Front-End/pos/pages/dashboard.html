@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | PawCare</title>
+    <link rel="stylesheet" href="../../css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-orange: #f97316;
+            --brand-amber: #f59e0b;
+            --brand-brown: #3d1f0a;
+            --brand-cream: #fef3c7;
+            --card-radius: 22px;
+        }
+
+        body { font-family: 'Nunito', sans-serif; background: #f5f0ea; }
+
+        /* ---- Page fade in ---- */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-up { animation: fadeUp 0.5s ease both; }
+        .d1 { animation-delay: 0.05s; }
+        .d2 { animation-delay: 0.12s; }
+        .d3 { animation-delay: 0.19s; }
+        .d4 { animation-delay: 0.26s; }
+        .d5 { animation-delay: 0.33s; }
+        .d6 { animation-delay: 0.40s; }
+
+        /* ---- Welcome Hero Card ---- */
+        .welcome-hero {
+            background: linear-gradient(135deg, #3d1f0a 0%, #7c3d0a 50%, #b45309 100%);
+            border-radius: var(--card-radius);
+            padding: 2.25rem 2.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.75rem;
+        }
+
+        .welcome-hero::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 240px; height: 240px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 50%;
+        }
+
+        .welcome-hero::after {
+            content: '🐾';
+            position: absolute;
+            right: 2.5rem; bottom: 1.25rem;
+            font-size: 5rem;
+            opacity: 0.12;
+        }
+
+        .welcome-greeting {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 6px;
+        }
+
+        .welcome-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.1rem;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: white;
+        }
+
+        .welcome-sub {
+            font-size: 0.88rem;
+            color: rgba(255,255,255,0.72);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .welcome-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .dog-tag {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 5px 14px 5px 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .dog-tag:hover { background: rgba(255,255,255,0.25); }
+
+        .alert-tag {
+            background: rgba(239,68,68,0.25);
+            border-color: rgba(239,68,68,0.4);
+        }
+
+        .welcome-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero-primary {
+            background: #f97316;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.625rem 1.25rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(249,115,22,0.4);
+            transition: all 0.2s;
+        }
+
+        .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(249,115,22,0.5); }
+
+        .btn-hero-ghost {
+            background: rgba(255,255,255,0.14);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 12px;
+            padding: 0.625rem 1.25rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .btn-hero-ghost:hover { background: rgba(255,255,255,0.22); }
+
+        /* ---- Stats Row ---- */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 18px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            transition: transform 0.25s, box-shadow 0.25s;
+            text-decoration: none;
+            cursor: default;
+        }
+
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,0.1); }
+
+        .stat-icon-wrap {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .stat-num {
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: #1e293b;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .stat-lbl {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #94a3b8;
+        }
+
+        /* ---- Main Grid ---- */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 1.75rem;
+            align-items: start;
+        }
+
+        @media (max-width: 1100px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ---- Section Headers ---- */
+        .section-hd {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 900;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .link-all {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #f97316;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .link-all:hover { opacity: 0.75; }
+
+        /* ---- Dog Cards Grid ---- */
+        .dog-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.1rem;
+        }
+
+        .dog-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .dog-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 14px 36px rgba(0,0,0,0.12);
+        }
+
+        .dog-card-banner {
+            height: 90px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .dc-color-1 { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+        .dc-color-2 { background: linear-gradient(135deg, #fbbf24, #f97316); }
+        .dc-color-3 { background: linear-gradient(135deg, #34d399, #10b981); }
+        .dc-color-4 { background: linear-gradient(135deg, #f472b6, #ec4899); }
+        .dc-color-5 { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+        .dc-color-6 { background: linear-gradient(135deg, #fb923c, #ef4444); }
+
+        .health-pill {
+            position: absolute;
+            top: 8px; right: 8px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .hp-good { color: #047857; }
+        .hp-warn { color: #b45309; }
+        .hp-bad  { color: #b91c1c; }
+
+        .dog-avatar {
+            width: 68px; height: 68px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            position: absolute;
+            bottom: -34px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            overflow: hidden;
+        }
+
+        .dog-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+        .dog-card-body {
+            padding: 2.75rem 1.1rem 1.1rem;
+            text-align: center;
+        }
+
+        .dc-name {
+            font-size: 1rem;
+            font-weight: 900;
+            color: #1e293b;
+            margin-bottom: 2px;
+        }
+
+        .dc-meta {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 0.875rem;
+        }
+
+        .dc-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem;
+            margin-bottom: 0.875rem;
+        }
+
+        .dc-stat {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 0.4rem 0.5rem;
+            text-align: left;
+        }
+
+        .dc-stat-lbl { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; }
+        .dc-stat-val { font-size: 0.82rem; font-weight: 800; color: #334155; }
+
+        .dc-footer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .dc-btn {
+            padding: 0.6rem 0.5rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .dc-btn-primary {
+            background: linear-gradient(135deg, #f97316, #f59e0b);
+            color: white;
+            border-radius: 0 0 0 18px;
+        }
+
+        .dc-btn-secondary {
+            background: #f8fafc;
+            color: #64748b;
+            border-left: 1px solid #f1f5f9;
+            border-radius: 0 0 18px 0;
+        }
+
+        .dc-btn:hover { filter: brightness(0.94); }
+
+        /* Add dog card */
+        .add-dog-card {
+            background: white;
+            border-radius: 20px;
+            border: 2.5px dashed #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.625rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 200px;
+            text-decoration: none;
+        }
+
+        .add-dog-card:hover { border-color: #f97316; background: #fff7ed; transform: translateY(-4px); }
+
+        .add-dog-card .add-icon {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, #fed7aa, #fdba74);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .add-dog-card:hover .add-icon { transform: scale(1.12) rotate(10deg); }
+
+        .add-dog-card span { font-size: 0.82rem; font-weight: 700; color: #94a3b8; }
+
+        /* ---- Quick Actions ---- */
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .qa-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            text-decoration: none;
+            transition: all 0.25s;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+
+        .qa-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.09); }
+
+        .qa-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .qa-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; }
+        .qa-title { font-size: 0.9rem; font-weight: 800; color: #1e293b; }
+
+        /* ---- Notifications Sidebar ---- */
+        .sidebar-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .notif-list { display: flex; flex-direction: column; gap: 0; }
+
+        .notif-item {
+            padding: 0.875rem 0;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .notif-item:last-child { border-bottom: none; }
+
+        .notif-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .notif-dot-red { background: #ef4444; }
+        .notif-dot-orange { background: #f97316; }
+        .notif-dot-green { background: #10b981; }
+        .notif-dot-blue { background: #3b82f6; }
+
+        .notif-title { font-size: 0.82rem; font-weight: 800; color: #1e293b; margin-bottom: 2px; }
+        .notif-body { font-size: 0.75rem; color: #64748b; font-weight: 600; line-height: 1.4; }
+        .notif-time { font-size: 0.68rem; color: #94a3b8; font-weight: 600; margin-top: 3px; }
+
+        /* ---- Page header area ---- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.75rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .top-bar-left h1 {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #1e293b;
+            margin: 0 0 2px;
+        }
+
+        .top-bar-left p { color: #94a3b8; font-size: 0.82rem; font-weight: 600; margin: 0; }
+
+        .top-bar-right { display: flex; gap: 0.75rem; align-items: center; }
+
+        .btn-top {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-top:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+        .btn-top-primary {
+            background: linear-gradient(135deg, #f97316, #f59e0b);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 14px rgba(249,115,22,0.3);
+        }
+
+        .btn-top-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(249,115,22,0.4); background: linear-gradient(135deg, #f97316, #f59e0b); }
+
+        .notice {
+            display: none;
+            padding: 0.875rem 1.25rem;
+            border-radius: 12px;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            font-size: 0.88rem;
+        }
+        .notice-success { display: block; background: #ecfdf5; color: #047857; }
+        .notice-error { display: block; background: #fef2f2; color: #b91c1c; }
+    </style>
+</head>
+
+<body>
+<div class="app-container">
+    <main class="main-content-premium">
+
+        <div id="dashboardNotice" class="notice"></div>
+
+        <!-- Top Bar -->
+        <div class="top-bar fade-up d1">
+            <div class="top-bar-left">
+                <h1>🏠 My Dashboard</h1>
+                <p id="currentDate">Loading...</p>
+            </div>
+            <div class="top-bar-right">
+                <a href="PetOwnerDashboard/darecare-appointments.html" class="btn-top">📅 Book</a>
+                <a href="PetOwnerDashboard/dogs.html" class="btn-top btn-top-primary">🐾 Add Dog</a>
+            </div>
+        </div>
+
+        <!-- Welcome Hero Card -->
+        <div class="welcome-hero fade-up d2" id="welcomeHero">
+            <div class="welcome-greeting">PET OWNER PORTAL</div>
+            <div class="welcome-name" id="welcomeName">Good morning! 🌅</div>
+            <div class="welcome-sub" id="welcomeSub">Your furry family is being looked after.</div>
+            <div class="welcome-tags" id="dogTags">
+                <!-- dog tags injected -->
+            </div>
+            <div class="welcome-actions">
+                <a href="PetOwnerDashboard/darecare-appointments.html" class="btn-hero-primary">📅 Book Daycare</a>
+                <a href="PetOwnerDashboard/dogs.html" class="btn-hero-ghost">➕ Add Dog</a>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row fade-up d3">
+            <div class="stat-card">
+                <div class="stat-icon-wrap" style="background: #eff6ff;">📅</div>
+                <div>
+                    <div class="stat-num" id="statBookings">--</div>
+                    <div class="stat-lbl">Upcoming Bookings</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-wrap" style="background: #ecfdf5;">📋</div>
+                <div>
+                    <div class="stat-num" id="statHealth">--</div>
+                    <div class="stat-lbl">Health Reports</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-wrap" style="background: #fff7ed;">💉</div>
+                <div>
+                    <div class="stat-num" id="statVaccines">--</div>
+                    <div class="stat-lbl">Vaccines Expiring</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-wrap" style="background: #f5f3ff;">🐕</div>
+                <div>
+                    <div class="stat-num" id="statDogs">--</div>
+                    <div class="stat-lbl">Dogs Registered</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <div>
+                <!-- Quick Actions -->
+                <div class="section-hd fade-up d4">
+                    <div class="section-title">⚡ Quick Actions</div>
+                </div>
+                <div class="quick-actions-grid fade-up d4" id="quickActions">
+                    <!-- injected by role -->
+                </div>
+
+                <!-- My Dogs -->
+                <div class="section-hd fade-up d5">
+                    <div class="section-title">🐾 My Family</div>
+                    <a href="PetOwnerDashboard/dogs.html" class="link-all">Manage all →</a>
+                </div>
+                <div class="dog-cards-grid fade-up d5" id="dogCardsGrid">
+                    <p style="color:#94a3b8;font-weight:600;font-size:0.88rem;padding:1rem;">Loading your furry friends...</p>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div>
+                <div class="section-hd fade-up d4">
+                    <div class="section-title">🔔 Notifications</div>
+                    <a href="#" class="link-all">Mark all read</a>
+                </div>
+                <div class="sidebar-card fade-up d4">
+                    <div class="notif-list" id="notifList">
+                        <div class="notif-item">
+                            <div class="notif-dot notif-dot-red"></div>
+                            <div>
+                                <div class="notif-title">💉 Vaccination Reminder</div>
+                                <div class="notif-body">Keep an eye on upcoming vaccine due dates for your pets.</div>
+                                <div class="notif-time">Today</div>
+                            </div>
+                        </div>
+                        <div class="notif-item">
+                            <div class="notif-dot notif-dot-orange"></div>
+                            <div>
+                                <div class="notif-title">📋 Health Report Ready</div>
+                                <div class="notif-body">Check the latest health report from your pet's caretaker.</div>
+                                <div class="notif-time">Today · 2:00 PM</div>
+                            </div>
+                        </div>
+                        <div class="notif-item">
+                            <div class="notif-dot notif-dot-blue"></div>
+                            <div>
+                                <div class="notif-title">🩺 Doctor Visit Arranged</div>
+                                <div class="notif-body">Your appointment has been confirmed with the vet.</div>
+                                <div class="notif-time">Yesterday</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="../../lib/jquery-3.7.1.min.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/notification.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+    const DOG_EMOJIS = ['🐕', '🐶', '🦮', '🐩', '🐕‍🦺'];
+    const BANNER_COLORS = ['dc-color-1', 'dc-color-2', 'dc-color-3', 'dc-color-4', 'dc-color-5', 'dc-color-6'];
+
+    $(document).ready(function () {
+        DogDaycareLayout.init();
+        const session = DogDaycareAuth.getSession();
+        if (!session) {
+            window.location.href = DogDaycareLayout.relPath + 'login.html';
+            return;
+        }
+
+        // Date
+        const now = new Date();
+        const hour = now.getHours();
+        const timeGreet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+        const timeEmoji = hour < 12 ? '🌅' : hour < 17 ? '☀️' : '🌙';
+        $('#currentDate').text(now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' — Your pups are in good paws');
+        $('#welcomeName').text(`${timeGreet}, ${session.name}! ${timeEmoji}`);
+        $('#welcomeSub').text('Your furry family is being looked after. Stay updated with real-time pet care.');
+
+        // Role-based top bar and hero visibility
+        if (session.role !== 'PET_OWNER') {
+            $('.top-bar-right, .welcome-actions, #dogTags').hide();
+            if (session.role === 'ADMIN') {
+                $('#welcomeSub').text('Manage your daycare facility, staff, and all pet records from here.');
+            }
+        }
+
+        // Quick Actions by role
+        const $qa = $('#quickActions');
+        if (session.role === 'ADMIN') {
+            [
+                { href: 'AdminDashboard/users.html', icon: '👥', iconBg: '#eff6ff', lbl: 'Manage', title: 'Users' },
+                { href: 'AdminDashboard/appointments.html', icon: '📅', iconBg: '#ecfdf5', lbl: 'Review', title: 'Daycare' },
+                { href: 'AdminDashboard/doctor-appointments.html', icon: '🩺', iconBg: '#fef3c7', lbl: 'Veterinary', title: 'Appointments' },
+                { href: 'AdminDashboard/dogs.html', icon: '🐕', iconBg: '#f5f3ff', lbl: 'All', title: 'Dog Profiles' },
+            ].forEach(a => $qa.append(`
+                    <a href="${a.href}" class="qa-card">
+                        <div class="qa-icon" style="background:${a.iconBg}">${a.icon}</div>
+                        <div><div class="qa-label">${a.lbl}</div><div class="qa-title">${a.title}</div></div>
+                    </a>`));
+        } else if (session.role === 'CARETAKER' || session.role === 'DOCTOR') {
+            [
+                { href: 'AdminDashboard/appointments.html', icon: '📅', iconBg: '#ecfdf5', lbl: 'View', title: 'Daycare' },
+                { href: 'AdminDashboard/doctor-appointments.html', icon: '🩺', iconBg: '#fef3c7', lbl: 'My', title: 'Appointments' },
+            ].forEach(a => $qa.append(`
+                    <a href="${a.href}" class="qa-card">
+                        <div class="qa-icon" style="background:${a.iconBg}">${a.icon}</div>
+                        <div><div class="qa-label">${a.lbl}</div><div class="qa-title">${a.title}</div></div>
+                    </a>`));
+        } else {
+            [
+                { href: 'PetOwnerDashboard/darecare-appointments.html', icon: '🏠', iconBg: '#ecfdf5', lbl: 'Book', title: 'Daycare' },
+                { href: 'PetOwnerDashboard/doctor-appointments.html', icon: '🩺', iconBg: '#eff6ff', lbl: 'Schedule', title: 'Vet Consult' },
+                { href: 'PetOwnerDashboard/dogs.html', icon: '🐕', iconBg: '#f5f3ff', lbl: 'My', title: 'Pets' },
+                { href: 'PetOwnerDashboard/reports.html', icon: '📋', iconBg: '#fff7ed', lbl: 'View', title: 'Health Reports' },
+            ].forEach(a => $qa.append(`
+                    <a href="${a.href}" class="qa-card">
+                        <div class="qa-icon" style="background:${a.iconBg}">${a.icon}</div>
+                        <div><div class="qa-label">${a.lbl}</div><div class="qa-title">${a.title}</div></div>
+                    </a>`));
+        }
+
+        // Load dogs
+        if (session.role === 'PET_OWNER') {
+            DogDaycareAuth.getDogsByOwner(session.userId).then(dogs => {
+                $('#statDogs').text(dogs.length);
+
+                // Dog tags in welcome hero
+                const $tags = $('#dogTags');
+                $tags.empty();
+                dogs.slice(0, 5).forEach((dog, idx) => {
+                    $tags.append(`<div class="dog-tag" onclick="window.location.href='PetOwnerDashboard/dogs.html'">${DOG_EMOJIS[idx % DOG_EMOJIS.length]} ${dog.name}</div>`);
+                });
+
+                // Dog cards grid
+                const $grid = $('#dogCardsGrid');
+                $grid.empty();
+
+                if (dogs.length === 0) {
+                    $grid.html('<p style="color:#94a3b8;font-weight:600;font-size:0.88rem;padding:1rem;">No pets registered yet.</p>');
+                } else {
+                    dogs.sort((a, b) => b.id - a.id).forEach((dog, idx) => {
+                        const color = BANNER_COLORS[idx % BANNER_COLORS.length];
+                        const emoji = DOG_EMOJIS[idx % DOG_EMOJIS.length];
+                        const age = calcAge(dog.dateOfBirth);
+
+                        $grid.append(`
+                                <div class="dog-card" onclick="window.location.href='PetOwnerDashboard/dogs.html'">
+                                    <div class="dog-card-banner ${color}">
+                                        <div class="health-pill hp-good">✓ Healthy</div>
+                                        <div class="dog-avatar">
+                                            ${dog.qrCodeBase64
+                            ? `<img src="data:image/png;base64,${dog.qrCodeBase64}" alt="${dog.name}">`
+                            : emoji}
+                                        </div>
+                                    </div>
+                                    <div class="dog-card-body">
+                                        <div class="dc-name">${dog.name}</div>
+                                        <div class="dc-meta">${dog.breed || 'Mixed'} · ${dog.dateOfBirth ? (dog.gender || '') : ''}</div>
+                                        <div class="dc-stats">
+                                            <div class="dc-stat">
+                                                <div class="dc-stat-lbl">Age</div>
+                                                <div class="dc-stat-val">${age}</div>
+                                            </div>
+                                            <div class="dc-stat">
+                                                <div class="dc-stat-lbl">Breed</div>
+                                                <div class="dc-stat-val" style="font-size:0.72rem">${(dog.breed || 'N/A').split(' ')[0]}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="dc-footer">
+                                        <a href="PetOwnerDashboard/darecare-appointments.html?dogId=${dog.id}" class="dc-btn dc-btn-primary" onclick="event.stopPropagation()">🏠 Daycare</a>
+                                        <a href="PetOwnerDashboard/reports.html?dogId=${dog.id}" class="dc-btn dc-btn-secondary" onclick="event.stopPropagation()">📋 Reports</a>
+                                    </div>
+                                </div>
+                            `);
+                    });
+                }
+
+                // Add dog card
+                $grid.append(`
+                        <a href="PetOwnerDashboard/dogs.html" class="add-dog-card">
+                            <div class="add-icon">🐾</div>
+                            <strong style="font-size:0.88rem;font-weight:800;color:#475569;">Add Another Dog</strong>
+                            <span>Register your next furry friend</span>
+                        </a>
+                    `);
+
+                // Placeholder stats
+                $('#statBookings').text('0');
+                $('#statHealth').text('0');
+                $('#statVaccines').text('0');
+            }).fail(() => {
+                $('#dogCardsGrid').html('<p style="color:#ef4444;font-weight:700;font-size:0.88rem;padding:1rem;">Failed to load pets.</p>');
+            });
+        } else {
+            // Non-owner: hide dog section
+            $('#dogCardsGrid').closest('div').prev('.section-hd').hide();
+            $('#dogCardsGrid').hide();
+            $('#welcomeHero').find('.welcome-tags, .welcome-actions').hide();
+            $('#statDogs').text('N/A');
+            $('#statBookings').text('N/A');
+            $('#statHealth').text('N/A');
+            $('#statVaccines').text('N/A');
+        }
+    });
+
+    function calcAge(dob) {
+        if (!dob) return 'N/A';
+        const diff = Date.now() - new Date(dob).getTime();
+        const y = Math.abs(new Date(diff).getUTCFullYear() - 1970);
+        return y + 'y';
+    }
+</script>
+</body>
+
+</html>

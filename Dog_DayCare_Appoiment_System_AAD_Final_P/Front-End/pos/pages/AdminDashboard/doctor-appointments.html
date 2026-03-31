@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Appointments | PawCare</title>
+    <link rel="stylesheet" href="../../../css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        a.active-page, button.active-page {
+            background: linear-gradient(135deg, #FF8C42, #F5A623) !important;
+            color: white !important; border-radius: 12px !important;
+            box-shadow: 0 4px 15px rgba(255,140,66,0.45) !important;
+        }
+        .navbar-premium {
+            background: linear-gradient(135deg, rgba(239,246,255,0.97), rgba(219,234,254,0.97)) !important;
+            border-bottom: 2px solid rgba(59,130,246,0.2) !important;
+        }
+        .navbar-page-accent {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-size: 0.78rem; font-weight: 800; color: #1D4ED8;
+            background: rgba(59,130,246,0.12);
+            padding: 0.28rem 0.85rem; border-radius: 99px;
+            font-family: 'Nunito', sans-serif;
+        }
+        .page-header { margin-bottom: 2rem; }
+        .page-header h1 { font-family:'Fredoka One',cursive; font-size:2rem; color:#1e293b; margin-bottom:4px; }
+        .page-header p { color:#94a3b8; font-weight:600; font-size:0.9rem; }
+        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
+        .stat-pill-card {
+            background:white; border-radius:18px; padding:1.1rem 1.3rem;
+            display:flex; align-items:center; gap:0.9rem;
+            box-shadow:0 2px 14px rgba(0,0,0,0.06);
+            transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .stat-pill-card:hover { transform:translateY(-4px) scale(1.02); }
+        .stat-icon { width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.35rem; flex-shrink:0; }
+        .si-blue   { background:linear-gradient(135deg,#EFF6FF,#DBEAFE); }
+        .si-amber  { background:linear-gradient(135deg,#FFFBEB,#FEF3C7); }
+        .si-green  { background:linear-gradient(135deg,#ECFDF5,#D1FAE5); }
+        .si-red    { background:linear-gradient(135deg,#FFF1F2,#FFE4E6); }
+        .stat-num  { font-family:'Fredoka One',cursive; font-size:1.65rem; color:#1e293b; line-height:1; }
+        .stat-lbl  { font-size:0.72rem; color:#94a3b8; font-weight:700; margin-top:1px; }
+        .toolbar-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem; }
+        .section-title { font-family:'Fredoka One',cursive; font-size:1.35rem; color:#1e293b; }
+        .search-box {
+            display:flex; align-items:center; gap:0.5rem;
+            background:white; border:2px solid #f1f5f9; border-radius:14px;
+            padding:0.5rem 1rem; box-shadow:0 2px 8px rgba(0,0,0,0.04);
+            transition:border-color 0.2s;
+        }
+        .search-box:focus-within { border-color:#5B9BD5; }
+        .search-box input { border:none; background:transparent; outline:none; font-size:0.88rem; font-family:'Nunito',sans-serif; font-weight:600; color:#1e293b; width:200px; }
+        .search-box input::placeholder { color:#cbd5e1; }
+        .appt-cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:1.25rem; }
+        .appt-card {
+            background:white; border-radius:22px; overflow:hidden;
+            box-shadow:0 3px 16px rgba(0,0,0,0.07);
+            transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s ease;
+            animation:slideUp 0.35s ease both;
+        }
+        @keyframes slideUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+        .appt-card:hover { transform:translateY(-8px) scale(1.01); box-shadow:0 18px 40px rgba(0,0,0,0.12); }
+        .card-banner {
+            height:90px; position:relative; overflow:hidden;
+            display:flex; align-items:flex-start; justify-content:space-between; padding:0.85rem 1.1rem;
+        }
+        .card-banner::before {
+            content:'🐾 🐾 🐾 🐾 🐾 🐾 🐾 🐾';
+            position:absolute; font-size:1.2rem; opacity:0.10;
+            top:4px; left:0; right:0; word-break:break-all; line-height:2.2; pointer-events:none;
+        }
+        .card-banner::after {
+            content:attr(data-bg-icon);
+            position:absolute; right:0.8rem; bottom:-0.6rem;
+            font-size:3.8rem; opacity:0.15; pointer-events:none;
+        }
+        .banner-requested { background:linear-gradient(135deg,#F5A623,#FFD166); }
+        .banner-confirmed { background:linear-gradient(135deg,#4CAF82,#7DDDAD); }
+        .banner-cancelled { background:linear-gradient(135deg,#F06B8A,#FF9DB5); }
+        .banner-default   { background:linear-gradient(135deg,#5B9BD5,#90CCF4); }
+        .status-pill {
+            display:inline-flex; align-items:center; gap:4px;
+            background:rgba(255,255,255,0.25); color:white;
+            border:1px solid rgba(255,255,255,0.35);
+            padding:0.28rem 0.75rem; border-radius:20px;
+            font-size:0.68rem; font-weight:800; font-family:'Nunito',sans-serif;
+            backdrop-filter:blur(4px); letter-spacing:0.04em;
+        }
+        .status-pill::before { content:'●'; font-size:0.42rem; }
+        .card-float-avatar {
+            width:52px; height:52px; background:white; border-radius:50%;
+            border:3px solid white; box-shadow:0 4px 14px rgba(0,0,0,0.14);
+            position:absolute; bottom:-26px; left:1.3rem;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.6rem; z-index:3; transition:transform 0.3s ease;
+        }
+        .appt-card:hover .card-float-avatar { transform:scale(1.15) rotate(-8deg); }
+        .card-body { padding:2rem 1.3rem 0.8rem; }
+        .card-dog-name { font-family:'Fredoka One',cursive; font-size:1.2rem; color:#1e293b; margin-bottom:2px; }
+        .card-meta { font-size:0.78rem; color:#94a3b8; font-weight:700; margin-bottom:1rem; }
+        .card-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:0.85rem; }
+        .info-pill { background:#f8fafc; border-radius:12px; padding:0.55rem 0.75rem; }
+        .info-lbl { font-size:0.62rem; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }
+        .info-val { font-size:0.88rem; color:#1e293b; font-weight:800; margin-top:2px; }
+        .info-pill.notes-pill { grid-column:1/-1; }
+        .info-val.notes-val { font-weight:600; font-size:0.8rem; font-style:italic; }
+        .card-footer { display:flex; gap:0.5rem; padding:0.6rem 1.3rem 1.1rem; border-top:1px solid #f8fafc; }
+        .btn-confirm {
+            flex:1; padding:0.55rem; border-radius:12px; font-size:0.78rem; font-weight:800;
+            font-family:'Nunito',sans-serif; cursor:pointer; border:none;
+            background:linear-gradient(135deg,#5B9BD5,#90CCF4); color:white;
+            display:flex; align-items:center; justify-content:center; gap:4px;
+            box-shadow:0 4px 12px rgba(91,155,213,0.35); transition:all 0.2s ease;
+        }
+        .btn-confirm:hover { transform:scale(1.04); box-shadow:0 6px 18px rgba(91,155,213,0.5); }
+        .btn-cancel-sm {
+            flex:1; padding:0.55rem; border-radius:12px; font-size:0.78rem; font-weight:800;
+            font-family:'Nunito',sans-serif; cursor:pointer;
+            background:#FFF1F2; color:#e11d48; border:none;
+            display:flex; align-items:center; justify-content:center; gap:4px; transition:all 0.2s ease;
+        }
+        .btn-cancel-sm:hover { background:#FFE4E6; transform:scale(1.04); }
+        .btn-done { flex:1; padding:0.55rem; border-radius:12px; font-size:0.78rem; font-weight:700; font-family:'Nunito',sans-serif; background:#f1f5f9; color:#94a3b8; border:none; cursor:default; display:flex; align-items:center; justify-content:center; }
+        .empty-state { grid-column:1/-1; text-align:center; padding:5rem 2rem; color:#94a3b8; }
+        .empty-emoji { font-size:3.5rem; display:block; margin-bottom:1rem; animation:float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+        @media(max-width:768px){ .stats-row{grid-template-columns:1fr 1fr;} .appt-cards-grid{grid-template-columns:1fr;} }
+        @media(max-width:480px){ .stats-row{grid-template-columns:1fr;} }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <main class="main-content-premium">
+        <div id="appointmentNotice" class="notice"></div>
+        <div class="page-header">
+            <h1 class="text-gradient">Doctor Appointment Oversight 🩺</h1>
+            <p>Manage and confirm all veterinary consultations.</p>
+        </div>
+        <div class="stats-row">
+            <div class="stat-pill-card"><div class="stat-icon si-blue">🩺</div><div><div class="stat-num" id="statTotal">—</div><div class="stat-lbl">Total</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon si-amber">⏳</div><div><div class="stat-num" id="statRequested">—</div><div class="stat-lbl">Requested</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon si-green">✅</div><div><div class="stat-num" id="statConfirmed">—</div><div class="stat-lbl">Confirmed</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon si-red">❌</div><div><div class="stat-num" id="statCancelled">—</div><div class="stat-lbl">Cancelled</div></div></div>
+        </div>
+        <div class="toolbar-row">
+            <div class="section-title">All Vet Appointments 🏥</div>
+            <div class="search-box">🔍 <input type="text" id="apptSearch" placeholder="Search dog or doctor…"></div>
+        </div>
+        <div class="appt-cards-grid" id="apptCardsGrid">
+            <div class="empty-state"><span class="empty-emoji">⏳</span><p style="font-weight:700">Loading consultations…</p></div>
+        </div>
+        <table style="display:none"><tbody id="apptList"></tbody></table>
+    </main>
+</div>
+<script src="../../../lib/jquery-3.7.1.min.js"></script>
+<script src="../../js/auth.js"></script>
+<script src="../../js/notification.js"></script>
+<script src="../../js/layout.js"></script>
+<script>
+    $(document).ready(function () {
+        DogDaycareLayout.init();
+        const session = DogDaycareAuth.getSession();
+        if (!session || session.role !== 'ADMIN') {
+            window.location.href = DogDaycareLayout.relPath + 'login.html'; return;
+        }
+        const curr = location.pathname.split('/').pop();
+        $('a').each(function(){ if($(this).attr('href')&&$(this).attr('href').split('/').pop().split('?')[0]===curr) $(this).addClass('active-page'); });
+        const $navbar = $('.navbar-premium');
+        if ($navbar.length) { $navbar.find('.navbar-page-accent').remove(); $navbar.append('<span class="navbar-page-accent">🩺 Doctor Appointments</span>'); }
+
+        let allApptsCache = [];
+        function updateStats(appts) {
+            $('#statTotal').text(appts.length);
+            $('#statRequested').text(appts.filter(a => a.status === 'REQUESTED').length);
+            $('#statConfirmed').text(appts.filter(a => a.status === 'CONFIRMED').length);
+            $('#statCancelled').text(appts.filter(a => a.status === 'CANCELLED').length);
+        }
+        const DOG_ICONS = ['🐶','🐕','🦮','🐩','🐾','🐕‍🦺'];
+        function dogIcon(id) { return DOG_ICONS[(id||0) % DOG_ICONS.length]; }
+        function topIcon(st) { return st==='REQUESTED'?'⏳':st==='CONFIRMED'?'✅':st==='CANCELLED'?'❌':'🩺'; }
+        function bannerClass(st) { return st==='REQUESTED'?'banner-requested':st==='CONFIRMED'?'banner-confirmed':st==='CANCELLED'?'banner-cancelled':'banner-default'; }
+
+        function renderCards(appts) {
+            const $grid = $('#apptCardsGrid'); $grid.empty();
+            if (!appts.length) { $grid.html('<div class="empty-state"><span class="empty-emoji">🩺</span><p style="font-weight:700">No doctor appointments found.</p></div>'); return; }
+            appts.sort((a, b) => new Date(b.appointmentTime) - new Date(a.appointmentTime)).forEach((appt,i) => {
+                const time = new Date(appt.appointmentTime);
+                const st = appt.status;
+                const icon = dogIcon(appt.dogId || appt.id);
+                const actionBtns = st === 'REQUESTED'
+                    ? `<button class="btn-confirm confirm-btn" data-id="${appt.id}">✅ Confirm</button><button class="btn-cancel-sm cancel-btn" data-id="${appt.id}">❌ Cancel</button>`
+                    : `<button class="btn-done">— ${st}</button>`;
+                $grid.append(`
+                <div class="appt-card" style="animation-delay:${i*0.06}s">
+                    <div class="card-banner ${bannerClass(st)}" data-bg-icon="${topIcon(st)}">
+                        <span class="status-pill">${st}</span>
+                    </div>
+                    <div class="card-float-avatar">${icon}</div>
+                    <div class="card-body">
+                        <div class="card-dog-name">${appt.dogName||'Dog '+appt.dogId}</div>
+                        <div class="card-meta">👨‍⚕️ Dr. ${appt.doctorName||'Veterinarian'}</div>
+                        <div class="card-info-grid">
+                            <div class="info-pill"><div class="info-lbl">📅 Date</div><div class="info-val">${time.toLocaleDateString()}</div></div>
+                            <div class="info-pill"><div class="info-lbl">🕐 Time</div><div class="info-val">${time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div>
+                            ${appt.notes?`<div class="info-pill notes-pill"><div class="info-lbl">📝 Notes</div><div class="info-val notes-val">${appt.notes}</div></div>`:''}
+                        </div>
+                    </div>
+                    <div class="card-footer">${actionBtns}</div>
+                </div>`);
+            });
+        }
+
+        function loadAppointments() {
+            $('#apptCardsGrid').html('<div class="empty-state"><span class="empty-emoji" style="animation:none">⏳</span><p style="font-weight:700">Loading…</p></div>');
+            DogDaycareAuth.getUsers('DOCTOR').then(doctors => {
+                let allAppts = [];
+                const promises = doctors.map(doc =>
+                    DogDaycareAuth.request('GET', '/api/v1/doctor-appointments?doctorId=' + doc.id).then(appts => {
+                        appts.forEach(a => a.doctorName = doc.name);
+                        allAppts = allAppts.concat(appts);
+                    })
+                );
+                Promise.all(promises).then(() => {
+                    allApptsCache = allAppts;
+                    updateStats(allAppts);
+                    renderCards(allAppts);
+                }).catch(() => {
+                    $('#apptCardsGrid').html('<div class="empty-state" style="color:#e11d48">⚠️ Error loading data.</div>');
+                });
+            }).fail(() => {
+                $('#apptCardsGrid').html('<div class="empty-state" style="color:#e11d48">⚠️ Error fetching doctor list.</div>');
+            });
+        }
+        loadAppointments();
+        $('#apptSearch').on('input', function () {
+            const q = $(this).val().toLowerCase();
+            renderCards(allApptsCache.filter(a => (a.dogName||'').toLowerCase().includes(q)||(a.doctorName||'').toLowerCase().includes(q)));
+        });
+        $(document).on('click', '.confirm-btn', function () {
+            const id = $(this).data('id');
+            DogDaycareAuth.updateDoctorAppointmentStatus(id, 'CONFIRMED').then(() => {
+                $('#appointmentNotice').text('Appointment confirmed!').removeClass('notice-error').addClass('notice-success').fadeIn();
+                loadAppointments(); setTimeout(() => $('#appointmentNotice').fadeOut(), 3000);
+            }).fail(xhr => { const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error confirming appointment'; $('#appointmentNotice').text(msg).removeClass('notice-success').addClass('notice-error').fadeIn(); });
+        });
+        $(document).on('click', '.cancel-btn', function () {
+            const id = $(this).data('id');
+            DogDaycareAuth.updateDoctorAppointmentStatus(id, 'CANCELLED').then(() => {
+                $('#appointmentNotice').text('Appointment cancelled.').removeClass('notice-error').addClass('notice-success').fadeIn();
+                loadAppointments(); setTimeout(() => $('#appointmentNotice').fadeOut(), 3000);
+            }).fail(xhr => { const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error cancelling appointment'; $('#appointmentNotice').text(msg).removeClass('notice-success').addClass('notice-error').fadeIn(); });
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog Management | PawCare</title>
+    <link rel="stylesheet" href="../../../css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        a.active-page {
+            background: linear-gradient(135deg, #ff8c42, #f5a623) !important;
+            color: white !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 15px rgba(255, 140, 66, 0.45) !important;
+        }
+        .navbar-page-accent {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #334155;
+            background: rgba(100, 116, 139, 0.12);
+            padding: 0.28rem 0.85rem;
+            border-radius: 99px;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .page-header h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            margin-bottom: 4px;
+            color: #1e293b;
+        }
+        .page-header p { color: #94a3b8; font-weight: 600; font-size: 0.9rem; }
+
+        .btn-add {
+            background: linear-gradient(135deg, #ff8c42, #f5a623);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(255, 140, 66, 0.4);
+            transition: all 0.2s ease;
+        }
+        .btn-add:hover { transform: translateY(-2px) scale(1.03); }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-pill-card {
+            background: white;
+            border-radius: 18px;
+            padding: 1rem 1.1rem;
+            box-shadow: 0 2px 14px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        }
+        .stat-num { font-family: 'Fredoka One', cursive; font-size: 1.45rem; color: #1e293b; line-height: 1; }
+        .stat-lbl { font-size: 0.68rem; color: #94a3b8; font-weight: 700; margin-top: 2px; }
+
+        .toolbar-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            background: white;
+            border-radius: 18px;
+            padding: 0.9rem 1.2rem;
+            border: 2px solid #f1f5f9;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+        .toolbar-left { display: flex; align-items: center; gap: 0.7rem; }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+        .toolbar-label { font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
+        .filter-select, .form-input {
+            padding: 0.55rem 0.85rem;
+            border-radius: 12px;
+            border: 2px solid #f1f5f9;
+            background: #fafbfc;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #1e293b;
+            font-family: 'Nunito', sans-serif;
+        }
+        .filter-select:focus, .form-input:focus {
+            outline: none;
+            border-color: #ff8c42;
+            box-shadow: 0 0 0 4px rgba(255, 140, 66, 0.12);
+            background: white;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 2px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 0.45rem 0.85rem;
+            background: #fafbfc;
+        }
+        .search-box:focus-within { border-color: #ff8c42; }
+        .search-box input {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.88rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            width: 220px;
+        }
+
+        .dog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 1.4rem;
+        }
+        .dog-card {
+            background: white;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+        .dog-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 20px 44px rgba(0, 0, 0, 0.12);
+        }
+        .dog-banner {
+            height: 106px;
+            background: linear-gradient(135deg, #5b9bd5, #90ccf4);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .dog-banner::before {
+            content: '🐾 🐾 🐾 🐾 🐾 🐾';
+            position: absolute;
+            inset: 8px;
+            opacity: 0.12;
+            pointer-events: none;
+            font-size: 1.4rem;
+            word-break: break-all;
+            line-height: 2.1;
+        }
+        .dog-avatar {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            border: 4px solid white;
+            background: white;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: -38px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        .dog-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .dog-body {
+            padding: 3rem 1.2rem 1rem;
+            text-align: center;
+        }
+        .dog-name {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.35rem;
+            color: #1e293b;
+            margin-bottom: 2px;
+        }
+        .dog-owner {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 0.9rem;
+        }
+        .dog-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.55rem;
+            margin-bottom: 0.9rem;
+            text-align: left;
+        }
+        .stat-pill {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 0.55rem 0.7rem;
+        }
+        .sp-label { font-size: 0.6rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+        .sp-value { font-size: 0.86rem; color: #1e293b; font-weight: 800; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .dog-card-footer {
+            padding: 0 1rem 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.55rem;
+        }
+        .cta-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 0.58rem;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            transition: all 0.2s ease;
+        }
+        .cta-btn:hover { transform: scale(1.04); }
+        .cta-edit { background: #eff6ff; color: #2563eb; }
+        .cta-del { background: #fff1f2; color: #e11d48; }
+
+        .empty-state { grid-column: 1 / -1; text-align: center; padding: 5rem 2rem; color: #94a3b8; }
+        .empty-emoji { font-size: 3.2rem; display: block; margin-bottom: 0.9rem; }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(6px);
+            display: none;
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-box {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.2);
+        }
+        .modal-box h2 { font-family: 'Fredoka One', cursive; font-size: 1.35rem; color: #1e293b; margin-bottom: 0.4rem; }
+        .modal-sub { color: #94a3b8; font-size: 0.84rem; font-weight: 600; margin-bottom: 1.4rem; }
+        .field { margin-bottom: 1rem; }
+        .field label {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 0.74rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .form-input { width: 100%; box-sizing: border-box; }
+        .owner-readonly {
+            background: #f8fafc;
+            border: 2px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.88rem;
+            color: #334155;
+            font-weight: 700;
+        }
+        .modal-actions { display: flex; gap: 0.8rem; margin-top: 1.4rem; }
+        .modal-confirm, .modal-cancel {
+            flex: 1;
+            border: none;
+            border-radius: 14px;
+            padding: 0.8rem;
+            font-size: 0.9rem;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+        }
+        .modal-confirm {
+            background: linear-gradient(135deg, #ff8c42, #f5a623);
+            color: white;
+            box-shadow: 0 6px 16px rgba(255, 140, 66, 0.4);
+        }
+        .modal-cancel { background: #f1f5f9; color: #64748b; }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+        @media (max-width: 1024px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .stats-row { grid-template-columns: 1fr; }
+            .dog-grid { grid-template-columns: 1fr; }
+            .search-box input { width: 150px; }
+            .modal-actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <main class="main-content-premium">
+        <div id="dogNotice" class="notice"></div>
+
+        <div class="page-header">
+            <div>
+                <h1 class="text-gradient">Dog Management 🐕</h1>
+                <p>Manage every registered dog profile from one place.</p>
+            </div>
+            <button id="addDogBtn" class="btn-add">+ Add New Dog</button>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-pill-card"><div class="stat-icon">🐕</div><div><div id="statAllDogs" class="stat-num">-</div><div class="stat-lbl">Total Dogs</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon">🏠</div><div><div id="statOwners" class="stat-num">-</div><div class="stat-lbl">Active Owners</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon">🎂</div><div><div id="statPuppies" class="stat-num">-</div><div class="stat-lbl">Puppies (&lt; 1y)</div></div></div>
+            <div class="stat-pill-card"><div class="stat-icon">📋</div><div><div id="statNoDob" class="stat-num">-</div><div class="stat-lbl">Missing DOB</div></div></div>
+        </div>
+
+        <div class="toolbar-bar">
+            <div class="toolbar-left">
+                <span class="toolbar-label">Owner:</span>
+                <label for="ownerFilter" class="sr-only">Filter by owner</label>
+                <select id="ownerFilter" class="filter-select">
+                    <option value="">All Owners</option>
+                </select>
+            </div>
+            <div class="search-box">
+                🔍
+                <label for="dogSearch" class="sr-only">Search dogs</label>
+                <input id="dogSearch" type="text" placeholder="Search dog, breed or owner...">
+            </div>
+        </div>
+
+        <div id="dogGrid" class="dog-grid">
+            <div class="empty-state"><span class="empty-emoji">⏳</span><p style="font-weight:700;">Loading dogs...</p></div>
+        </div>
+    </main>
+</div>
+
+<div class="modal-overlay" id="addDogModal">
+    <div class="modal-box">
+        <h2>Add Dog Profile</h2>
+        <p class="modal-sub">Create a new profile and assign it to a pet owner.</p>
+        <form id="addDogForm">
+            <div class="field"><label for="dogName">Dog Name</label><input id="dogName" class="form-input" type="text" required></div>
+            <div class="field"><label for="dogBreed">Breed</label><input id="dogBreed" class="form-input" type="text" required></div>
+            <div class="field"><label for="dogDob">Date of Birth</label><input id="dogDob" class="form-input" type="date"></div>
+            <div class="field"><label for="dogOwner">Owner</label>
+                <select id="dogOwner" class="form-input" required></select>
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="modal-confirm">🐾 Save Dog</button>
+                <button type="button" class="modal-cancel closeModalBtn">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editDogModal">
+    <div class="modal-box">
+        <h2>Edit Dog Profile</h2>
+        <p class="modal-sub">Update this dog's details.</p>
+        <form id="editDogForm">
+            <input id="editDogId" type="hidden">
+            <div class="field"><label for="editDogName">Dog Name</label><input id="editDogName" class="form-input" type="text" required></div>
+            <div class="field"><label for="editDogBreed">Breed</label><input id="editDogBreed" class="form-input" type="text" required></div>
+            <div class="field"><label for="editDogDob">Date of Birth</label><input id="editDogDob" class="form-input" type="date"></div>
+            <div class="field"><label>Owner</label><div id="editDogOwner" class="owner-readonly">-</div></div>
+            <div class="modal-actions">
+                <button type="submit" class="modal-confirm">💾 Save Changes</button>
+                <button type="button" class="modal-cancel closeModalBtn">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="../../../lib/jquery-3.7.1.min.js"></script>
+<script src="../../js/auth.js"></script>
+<script src="../../js/layout.js"></script>
+<script>
+    (function () {
+        'use strict';
+
+        const DOG_EMOJIS = ['🐶', '🦮', '🐩', '🐕', '🐕‍🦺', '🐾'];
+        let dogsCache = [];
+        let filteredDogs = [];
+        let ownersById = {};
+        let ownersList = [];
+
+        function escapeHtml(value) {
+            if (value == null) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function showNotice(type, message) {
+            const $n = $('#dogNotice');
+            $n.removeClass('notice-success notice-error')
+                .addClass(type === 'success' ? 'notice-success' : 'notice-error')
+                .text(message)
+                .fadeIn();
+            setTimeout(function () { $n.fadeOut(); }, 3200);
+        }
+
+        function getErrorMessage(xhr, fallback) {
+            if (xhr && xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.error)) {
+                return xhr.responseJSON.message || xhr.responseJSON.error;
+            }
+            return fallback;
+        }
+
+        function calcAge(dob) {
+            if (!dob) return 'N/A';
+            const diff = Date.now() - new Date(dob).getTime();
+            const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+            if (years < 1) {
+                const months = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24 * 30.44)));
+                return months + 'mo';
+            }
+            return years + 'yr' + (years !== 1 ? 's' : '');
+        }
+
+        function ownerName(ownerId) {
+            const owner = ownersById[String(ownerId)];
+            return owner ? owner.name : ('Owner #' + ownerId);
+        }
+
+        function fillOwnerOptions() {
+            const $filter = $('#ownerFilter');
+            const $owner = $('#dogOwner');
+            $filter.find('option:not(:first)').remove();
+            $owner.empty();
+
+            if (!ownersList.length) {
+                $owner.append('<option value="">No pet owners available</option>');
+                return;
+            }
+
+            ownersList.forEach(function (o) {
+                const label = escapeHtml(o.name + ' (' + o.email + ')');
+                $filter.append('<option value="' + o.id + '">' + label + '</option>');
+                $owner.append('<option value="' + o.id + '">' + label + '</option>');
+            });
+        }
+
+        function updateStats(dogs) {
+            const withDob = dogs.filter(function (d) { return !!d.dateOfBirth; });
+            const puppies = withDob.filter(function (d) {
+                const ageInDays = (Date.now() - new Date(d.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24);
+                return ageInDays < 365.25;
+            }).length;
+            const ownerCount = new Set(dogs.map(function (d) { return String(d.ownerId); })).size;
+
+            $('#statAllDogs').text(dogs.length);
+            $('#statOwners').text(ownerCount);
+            $('#statPuppies').text(puppies);
+            $('#statNoDob').text(dogs.length - withDob.length);
+        }
+
+        function renderDogs(dogs) {
+            const $grid = $('#dogGrid');
+            $grid.empty();
+
+            if (!dogs.length) {
+                $grid.html('<div class="empty-state"><span class="empty-emoji">🐾</span><p style="font-weight:700;">No dogs found for this filter.</p></div>');
+                return;
+            }
+
+            dogs.forEach(function (dog, idx) {
+                const avatar = dog.qrCodeBase64
+                    ? '<img src="data:image/png;base64,' + dog.qrCodeBase64 + '" alt="Dog QR">'
+                    : DOG_EMOJIS[idx % DOG_EMOJIS.length];
+                const owner = ownerName(dog.ownerId);
+                const breed = dog.breed || '-';
+                $grid.append(
+                    '<div class="dog-card">' +
+                        '<div class="dog-banner"><div class="dog-avatar">' + avatar + '</div></div>' +
+                        '<div class="dog-body">' +
+                            '<div class="dog-name">' + escapeHtml(dog.name || 'Unnamed') + '</div>' +
+                            '<div class="dog-owner">Owner: ' + escapeHtml(owner) + '</div>' +
+                            '<div class="dog-stats">' +
+                                '<div class="stat-pill"><div class="sp-label">Breed</div><div class="sp-value">' + escapeHtml(breed) + '</div></div>' +
+                                '<div class="stat-pill"><div class="sp-label">Age</div><div class="sp-value">' + escapeHtml(calcAge(dog.dateOfBirth)) + '</div></div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="dog-card-footer">' +
+                            '<button class="cta-btn cta-edit edit-dog-btn" data-id="' + dog.id + '">✏️ Edit</button>' +
+                            '<button class="cta-btn cta-del delete-dog-btn" data-id="' + dog.id + '">🗑️ Delete</button>' +
+                        '</div>' +
+                    '</div>'
+                );
+            });
+        }
+
+        function applyFilters() {
+            const ownerId = $('#ownerFilter').val();
+            const query = ($('#dogSearch').val() || '').toLowerCase();
+
+            filteredDogs = dogsCache.filter(function (dog) {
+                const owner = ownerName(dog.ownerId).toLowerCase();
+                const inOwner = !ownerId || String(dog.ownerId) === ownerId;
+                const inQuery = !query
+                    || (dog.name || '').toLowerCase().indexOf(query) >= 0
+                    || (dog.breed || '').toLowerCase().indexOf(query) >= 0
+                    || owner.indexOf(query) >= 0;
+                return inOwner && inQuery;
+            });
+
+            renderDogs(filteredDogs);
+        }
+
+        function loadOwners() {
+            return DogDaycareAuth.getUsers('PET_OWNER').then(function (owners) {
+                ownersList = owners || [];
+                ownersById = {};
+                ownersList.forEach(function (o) { ownersById[String(o.id)] = o; });
+                fillOwnerOptions();
+            });
+        }
+
+        function loadDogs() {
+            $('#dogGrid').html('<div class="empty-state"><span class="empty-emoji">⏳</span><p style="font-weight:700;">Loading dogs...</p></div>');
+            return DogDaycareAuth.getDogs().then(function (dogs) {
+                dogsCache = (dogs || []).slice().sort(function (a, b) { return Number(b.id) - Number(a.id); });
+                updateStats(dogsCache);
+                applyFilters();
+            }).fail(function (xhr) {
+                $('#dogGrid').html('<div class="empty-state" style="color:#e11d48;">Failed to load dogs.</div>');
+                showNotice('error', getErrorMessage(xhr, 'Failed to load dogs'));
+            });
+        }
+
+        function resetAddForm() {
+            $('#addDogForm')[0].reset();
+            if (ownersList.length) {
+                $('#dogOwner').val(String(ownersList[0].id));
+            }
+        }
+
+        $(document).ready(function () {
+            DogDaycareLayout.init();
+            const $dogGrid = $('#dogGrid');
+            const session = DogDaycareAuth.getSession();
+            if (!session) {
+                window.location.href = DogDaycareLayout.relPath + 'login.html';
+                return;
+            }
+            if (session.role !== 'ADMIN') {
+                window.location.href = DogDaycareLayout.relPath + 'dashboard.html';
+                return;
+            }
+
+            const current = location.pathname.split('/').pop();
+            $('a').each(function () {
+                const href = $(this).attr('href');
+                if (href && href.split('/').pop().split('?')[0] === current) {
+                    $(this).addClass('active-page');
+                }
+            });
+
+            const $navbar = $('.navbar-premium');
+            if ($navbar.length) {
+                $navbar.find('.navbar-page-accent').remove();
+                $navbar.append('<span class="navbar-page-accent">🐕 Dog Management</span>');
+            }
+
+            $.when(loadOwners(), loadDogs()).done(function () {
+                resetAddForm();
+                applyFilters();
+            }).fail(function (xhr) {
+                showNotice('error', getErrorMessage(xhr, 'Failed to initialize page data'));
+            });
+
+            $('#ownerFilter').on('change', applyFilters);
+            $('#dogSearch').on('input', applyFilters);
+
+            $('#addDogBtn').on('click', function () {
+                resetAddForm();
+                $('#addDogModal').css('display', 'flex').hide().fadeIn();
+            });
+            $('.closeModalBtn').on('click', function () { $('.modal-overlay').fadeOut(); });
+            $('.modal-overlay').on('click', function (e) { if (e.target === this) $(this).fadeOut(); });
+
+            $('#addDogForm').on('submit', function (e) {
+                e.preventDefault();
+                const payload = {
+                    name: $.trim($('#dogName').val()),
+                    breed: $.trim($('#dogBreed').val()),
+                    dateOfBirth: $('#dogDob').val() || null,
+                    ownerId: Number($('#dogOwner').val())
+                };
+                DogDaycareAuth.createDog(payload).then(function () {
+                    $('#addDogModal').fadeOut();
+                    showNotice('success', 'Dog profile created successfully.');
+                    loadDogs();
+                }).fail(function (xhr) {
+                    showNotice('error', getErrorMessage(xhr, 'Failed to create dog profile'));
+                });
+            });
+
+            $dogGrid.on('click', '.edit-dog-btn', function () {
+                const dogId = Number($(this).data('id'));
+                const dog = dogsCache.find(function (d) { return Number(d.id) === dogId; });
+                if (!dog) return;
+
+                $('#editDogId').val(dog.id);
+                $('#editDogName').val(dog.name || '');
+                $('#editDogBreed').val(dog.breed || '');
+                $('#editDogDob').val(dog.dateOfBirth || '');
+                $('#editDogOwner').text(ownerName(dog.ownerId));
+                $('#editDogModal').css('display', 'flex').hide().fadeIn();
+            });
+
+            $('#editDogForm').on('submit', function (e) {
+                e.preventDefault();
+                const dogId = Number($('#editDogId').val());
+                const payload = {
+                    name: $.trim($('#editDogName').val()),
+                    breed: $.trim($('#editDogBreed').val()),
+                    dateOfBirth: $('#editDogDob').val() || null
+                };
+
+                DogDaycareAuth.updateDog(dogId, payload).then(function () {
+                    $('#editDogModal').fadeOut();
+                    showNotice('success', 'Dog profile updated successfully.');
+                    loadDogs();
+                }).fail(function (xhr) {
+                    showNotice('error', getErrorMessage(xhr, 'Failed to update dog profile'));
+                });
+            });
+
+            $dogGrid.on('click', '.delete-dog-btn', function () {
+                const dogId = Number($(this).data('id'));
+                const dog = dogsCache.find(function (d) { return Number(d.id) === dogId; });
+                const label = dog ? dog.name : ('dog #' + dogId);
+                if (!window.confirm('Delete ' + label + '? This action cannot be undone.')) return;
+
+                DogDaycareAuth.deleteDog(dogId).then(function () {
+                    showNotice('success', 'Dog profile deleted successfully.');
+                    loadDogs();
+                }).fail(function (xhr) {
+                    showNotice('error', getErrorMessage(xhr, 'Failed to delete dog profile'));
+                });
+            });
+
+            $(document).on('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    $('.modal-overlay').fadeOut();
+                }
+            });
+        });
+    })();
+</script>
+</body>
+</html>
+
+
+
