@@ -14,6 +14,7 @@
         return localStorage.getItem(API_BASE_KEY) || DEFAULT_API_BASE_URL;
     }
 
+
     function buildUrl(path) {
         if (/^https?:\/\//i.test(path)) {
             return path;
